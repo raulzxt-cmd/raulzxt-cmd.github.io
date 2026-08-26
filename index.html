@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vergil Hsieh, Web Developer</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <!-- 動態發光背景容器 -->
+  <div class="bg-glow-container" id="bg-glow">
+    <canvas id="snow-canvas"></canvas>
+  </div>
+
+  <!-- 右側懸浮膠囊滾動進度條 -->
+<div class="scroll-progress-container" id="scroll-progress-container">
+  <div class="scroll-progress-bar" id="scroll-progress-bar"></div>
+</div>
+
+  <!-- 導覽列 -->
+  <header class="navbar" id="navbar">
+    <div class="nav-container">
+      <!-- Logo 回到頂部 -->
+      <a href="#" class="logo" id="logo-btn" aria-label="Go to top">V</a>
+
+      <!-- 漢堡按鈕 -->
+      <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu" aria-expanded="false">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <!-- 導覽選單 -->
+      <nav class="nav-links" id="nav-links">
+        <ol>
+          <li><a href="#about"><span class="nav-number">01.</span>About</a></li>
+          <li><a href="#stack"><span class="nav-number">02.</span>My Stack</a></li>
+          <li><a href="#work"><span class="nav-number">03.</span>Works</a></li>
+          <li><a href="#contact"><span class="nav-number">04.</span>Contact</a></li>
+        </ol>
+        <a href="/resume.pdf" class="btn-resume" target="_blank" rel="noopener noreferrer">Resume</a>
+      </nav>
+
+      <!-- 遮罩層 -->
+      <div class="nav-overlay" id="nav-overlay"></div>
+    </div>
+  </header>
+
+  <!-- 網頁主要內容 -->
+  <main style="height: 2000px; padding-top: 120px;">
+    <!-- 01. About 區塊 -->
+    <section id="about" class="about-section">
+      <div class="about-inner">
+        <!-- 左側：個人自述與技能清單 -->
+        <div class="about-text">
+          <h2 class="numbered-heading">
+            <span class="heading-number">01.</span> About Me
+          </h2>
+          <p>
+            Hello! I'm Vergil, a software engineer based in Taichung, Taiwan. I enjoy creating things that live on the
+            internet, whether that be websites, applications, or anything in between. My goal is to always build
+            products that provide pixel-perfect, performant experiences.
+          </p>
+
+        </div>
+
+        <!-- 右側：個人形象照卡片 (經典霓虹綠濾鏡 + 邊框位移特效) -->
+        <div class="about-pic">
+          <div class="wrapper">
+            <img src="images/大頭貼.jfif" alt="Avatar" class="img" />
+          </div>
+        </div>
+      </div>
+      <!-- 區塊標題 (含編號與延伸線) -->
+    </section>
+    <!-- 02. My Stack 區塊 -->
+    <section id="stack" class="stack-section">
+      <!-- 區塊標題 (延用編號與延伸線樣式) -->
+      <h2 class="numbered-heading">
+        <span class="heading-number">02.</span> My Stack
+      </h2>
+
+      <!-- 技能卡片網格 -->
+      <div class="stack-grid">
+        <!-- HTML5 -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" alt="HTML5" />
+          </div>
+          <span class="stack-name">HTML5</span>
+        </div>
+
+        <!-- CSS3 -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS3" />
+          </div>
+          <span class="stack-name">CSS3</span>
+        </div>
+
+        <!-- Sass / SCSS -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg" alt="Sass" />
+          </div>
+          <span class="stack-name">Sass / SCSS</span>
+        </div>
+
+        <!-- JavaScript -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg"
+              alt="JavaScript" />
+          </div>
+          <span class="stack-name">JavaScript</span>
+        </div>
+
+        <!-- Figma -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" alt="Figma" />
+          </div>
+          <span class="stack-name">Figma</span>
+        </div>
+
+        <!-- VS Code -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" alt="VS Code" />
+          </div>
+          <span class="stack-name">VS Code</span>
+        </div>
+
+        <!-- Git -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" alt="Git" />
+          </div>
+          <span class="stack-name">Git</span>
+        </div>
+
+        <!-- GitHub -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"
+              class="invert-dark" />
+          </div>
+          <span class="stack-name">GitHub</span>
+        </div>
+
+        <!-- MySQL -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" alt="MySQL" />
+          </div>
+          <span class="stack-name">MySQL</span>
+        </div>
+
+        <!-- PHP -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg" alt="PHP" />
+          </div>
+          <span class="stack-name">PHP</span>
+        </div>
+
+        <!-- Bootstrap -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg"
+              alt="Bootstrap" />
+          </div>
+          <span class="stack-name">Bootstrap</span>
+        </div>
+
+<!-- Adobe Photoshop -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/photoshop/photoshop-original.svg" alt="Photoshop" class="adobe-icon" />
+          </div>
+          <span class="stack-name">Photoshop</span>
+        </div>
+
+        <!-- Adobe Illustrator -->
+        <div class="stack-card">
+          <div class="icon-box">
+            <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/illustrator/illustrator-original.svg" alt="Illustrator" class="adobe-icon" />
+          </div>
+          <span class="stack-name">Illustrator</span>
+        </div>
+      </div>
+    </section>
+    <!-- ========================================== -->
+    <!-- 03. Work 區塊 (列表 Hover 浮現預覽圖動畫) -->
+    <!-- ========================================== -->
+    <section id="work" class="work-section">
+      <h2 class="numbered-heading">
+        <span class="heading-number">03.</span> Works
+      </h2>
+
+      <!-- 專案浮動預覽圖 (由 JS 控制跟隨與切換圖片) -->
+      <div class="project-preview-modal" id="project-preview">
+        <img src="" alt="Project Preview" id="project-preview-img" />
+      </div>
+
+      <div class="projects-list">
+        <!-- 專案 01 -->
+        <a href="https://github.com" target="_blank" class="project-item"
+          data-img="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80">
+          <div class="project-left">
+            <span class="project-num">_01.</span>
+            <div class="project-info">
+              <h3 class="project-title">Electro EV <span class="external-icon">↗</span></h3>
+              <p class="project-tags">Next.js <span>•</span> Payload CMS <span>•</span> Tailwind CSS</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- 專案 02 -->
+        <a href="https://github.com" target="_blank" class="project-item"
+          data-img="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80">
+          <div class="project-left">
+            <span class="project-num">_02.</span>
+            <div class="project-info">
+              <h3 class="project-title">Epikcart <span class="external-icon">↗</span></h3>
+              <p class="project-tags">React <span>•</span> Redux <span>•</span> React i18n</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- 專案 03 -->
+        <a href="https://github.com" target="_blank" class="project-item"
+          data-img="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80">
+          <div class="project-left">
+            <span class="project-num">_03.</span>
+            <div class="project-info">
+              <h3 class="project-title">Resume Roaster <span class="external-icon">↗</span></h3>
+              <p class="project-tags">GPT-4 <span>•</span> Next.js <span>•</span> PostgreSQL</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- 專案 04 -->
+        <a href="https://github.com" target="_blank" class="project-item"
+          data-img="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80">
+          <div class="project-left">
+            <span class="project-num">_04.</span>
+            <div class="project-info">
+              <h3 class="project-title">Real Estate <span class="external-icon">↗</span></h3>
+              <p class="project-tags">React.js <span>•</span> Redux <span>•</span> Tailwind CSS</p>
+            </div>
+          </div>
+        </a>
+
+        <!-- 專案 05 -->
+        <a href="https://github.com" target="_blank" class="project-item"
+          data-img="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80">
+          <div class="project-left">
+            <span class="project-num">_05.</span>
+            <div class="project-info">
+              <h3 class="project-title">Consulting Finance <span class="external-icon">↗</span></h3>
+              <p class="project-tags">HTML <span>•</span> CSS & SCSS <span>•</span> JavaScript</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 04. Contact 區塊 (Creavolio 風格) -->
+    <!-- ========================================== -->
+    <section id="contact" class="contact-section">
+      <div class="contact-container">
+        <!-- 補上編號標題 (與 01, 02, 03 保持一致) -->
+        <h2 class="numbered-heading">
+          <span class="heading-number">04.</span> Contact
+        </h2>
+        <br>
+        <br>
+        <!-- 綠色膠囊按鈕 -->
+        <div class="contact-cta">
+          <a href="mailto:hsiehvergil@gmail.com" class="btn-send-message">
+            SEND MESSAGE <span>↗</span>
+          </a>
+        </div>
+
+        <!-- 聯絡資訊網格 -->
+        <div class="contact-info-grid">
+          <!-- <div class="info-block">
+            <span class="info-label">PHONE NUMBER</span>
+            <a href="tel:+886912345678" class="info-value">+886 912 345 678</a>
+          </div> -->
+
+          <div class="info-block">
+            <span class="info-label">EMAIL</span>
+            <a href="mailto:your-email@example.com" class="info-value">hsiehvergil@gmail.com</a>
+          </div>
+
+          <div class="info-block">
+            <span class="info-label">LOCATION</span>
+            <span class="info-value">Taichung, Taiwan</span>
+          </div>
+        </div>
+
+        <!-- 底部版權與社群連結 -->
+        <footer class="footer-divider">
+          <div class="copyright">
+            © 2026 <span class="highlight">VERGIL HSIEH</span> All Rights Reserved.
+          </div>
+
+          <!-- <div class="social-links">
+            <a href="https://github.com" target="_blank" aria-label="GitHub">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"
+                class="social-icon invert-white" />
+            </a>
+            <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg"
+                alt="LinkedIn" class="social-icon" />
+            </a>
+            <a href="https://figma.com" target="_blank" aria-label="Figma">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" alt="Figma"
+                class="social-icon" />
+            </a>
+          </div> -->
+        </footer>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- 右下角 Go To Top 懸浮按鈕 -->
+  <button id="back-to-top" class="back-to-top-btn" aria-label="Back to top">
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>GO TOP
+  </button>
+
+  <!-- 統一引入單一 JS 檔案 -->
+  <script src="main.js"></script>
+</body>
+
+</html>
