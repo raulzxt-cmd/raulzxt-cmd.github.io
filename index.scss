@@ -510,6 +510,11 @@ main {
         &.adobe-icon {
           filter: grayscale(100%) brightness(2.2) opacity(0.85);
         }
+
+        // Adobe illustraor icon 降低透明度
+        &.adobe-icon-illustrator {
+          filter: grayscale(150%) brightness(0.6) opacity(0.38);
+        }
       }
     }
 

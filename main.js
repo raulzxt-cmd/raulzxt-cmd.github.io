@@ -153,8 +153,8 @@ if (previewModal && previewImg) {
 
     // 滑鼠移動：讓圖片彈窗平滑跟隨座標
     item.addEventListener('mousemove', (e) => {
-      previewModal.style.left = `${e.clientX + 20}px`;
-      previewModal.style.top = `${e.clientY + 20}px`;
+      previewModal.style.left = `${e.clientX + 10}px`;
+      previewModal.style.top = `${e.clientY + 10}px`;
     });
 
     // 滑鼠移出：隱藏彈窗

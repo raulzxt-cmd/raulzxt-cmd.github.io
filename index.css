@@ -396,6 +396,9 @@ main {
 .stack-section .stack-card .icon-box img.adobe-icon {
   filter: grayscale(100%) brightness(2.2) opacity(0.85);
 }
+.stack-section .stack-card .icon-box img.adobe-icon-illustrator {
+  filter: grayscale(150%) brightness(0.6) opacity(0.38);
+}
 .stack-section .stack-card .stack-name {
   font-family: "SF Mono", "Fira Code", "Roboto Mono", monospace;
   font-size: 0.85rem;
