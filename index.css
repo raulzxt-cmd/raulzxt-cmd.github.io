@@ -1,4 +1,6 @@
 @charset "UTF-8";
+
+/* ===== 導覽列 (Navbar) ===== */
 .navbar {
   position: fixed;
   top: 0;
@@ -18,7 +20,7 @@
   max-width: 1200px;
   height: 100%;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 35px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -29,25 +31,28 @@
   font-weight: 700;
   text-decoration: none;
   border: 2px solid #7b9af0;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
 }
 .navbar .logo:hover {
   transform: translateY(-2px);
 }
+
+/* 導覽選項容器：微調間距，維持充裕水平空間 */
 .navbar .nav-links {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 12px; /* 縮小按鈕群與選項間隙 */
 }
 .navbar .nav-links ol {
   display: flex;
-  gap: 25px;
+  gap: 14px; /* 縮小 01~04 選項間距 */
   list-style: none;
   margin: 0;
   padding: 0;
@@ -55,34 +60,26 @@
 .navbar .nav-links ol li a {
   color: #ccd6f6;
   font-family: "SF Mono", "Fira Code", "Roboto Mono", monospace;
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   text-decoration: none;
+  white-space: nowrap; /* 核心：防止文字換行 */
   transition: color 0.2s ease;
 }
 .navbar .nav-links ol li a .nav-number {
   color: #7b9af0;
-  margin-right: 5px;
+  margin-right: 4px;
 }
 .navbar .nav-links ol li a:hover {
   color: #7b9af0;
 }
-.navbar .nav-links .btn-resume {
-  color: #7b9af0;
-  background: transparent;
-  border: 1px solid #7b9af0;
-  border-radius: 4px;
-  padding: 10px 18px;
-  font-family: "SF Mono", "Fira Code", "Roboto Mono", monospace;
-  font-size: 1.2rem;
-  text-decoration: none;
-  transition: all 0.25s ease;
-}
+
 .navbar .nav-links .btn-resume:hover {
   background-color: rgba(123, 154, 240, 0.1);
-  transform: translate(-2px, -2px);
+  transform: translate(-1px, -1px);
   box-shadow: 2px 2px 0 #7b9af0;
 }
 
+/* 漢堡選單按鈕 */
 .hamburger-btn {
   display: none;
   background: transparent;
@@ -127,9 +124,10 @@
   opacity: 1;
 }
 
+/* ===== 響應式斷點：設定為 768px（手機直向才觸發漢堡選單） ===== */
 @media (max-width: 768px) {
   .navbar .nav-container {
-    padding: 0 25px;
+    padding: 0 20px;
   }
   .hamburger-btn {
     display: block;
@@ -139,37 +137,54 @@
     top: 0;
     right: -100%;
     width: 75vw;
-    max-width: 350px;
+    max-width: 320px;
     height: 100vh;
     height: 100dvh;
     background-color: #112240;
     box-shadow: -10px 0px 30px -15px rgba(2, 12, 27, 0.7);
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    gap: 40px;
+    align-items: flex-start; /* 抽屜內選項靠左對齊 */
+    padding-left: 50px;
+    padding-right: 30px;
+    box-sizing: border-box;
+    gap: 18px;
     z-index: 1000;
     transition: right 0.35s cubic-bezier(0.645, 0.045, 0.355, 1);
   }
+
   .navbar .nav-links.active {
     right: 0;
   }
+
+  /* 01~04 連結列表靠左 */
   .navbar .nav-links ol {
     flex-direction: column;
-    align-items: center;
-    gap: 25px;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 0;
+    margin: 0;
   }
+
   .navbar .nav-links ol li a {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
   }
-  .navbar .nav-links ol li a .nav-number {
-    font-size: 0.9rem;
+
+  /* 下方的按鈕群重設左邊距，靠左對齊 */
+  .navbar .nav-links .btn-resume,
+  .btn-theme-toggle,
+  .btn-lang-toggle {
+    margin-left: 0 !important;
+    align-self: flex-start;
+    text-align: center;
   }
 }
+
+/* ===== 基礎全域樣式 ===== */
 body {
   margin: 0;
   padding: 0;
@@ -178,6 +193,7 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .bg-glow-container {
@@ -214,6 +230,7 @@ main {
   z-index: 1;
 }
 
+/* 帶編號的標題樣式 */
 .numbered-heading {
   display: flex;
   align-items: center;
@@ -247,6 +264,7 @@ main {
   }
 }
 
+/* ===== 01. About 區塊 ===== */
 .about-section {
   max-width: 900px;
   margin: 0 auto;
@@ -350,6 +368,7 @@ main {
   mix-blend-mode: normal;
 }
 
+/* ===== 02. My Stack 區塊 ===== */
 .stack-section {
   max-width: 900px;
   margin: 0 auto;
@@ -385,8 +404,7 @@ main {
 .stack-section .stack-card .icon-box img {
   width: 100%;
   height: 100%;
-  -o-object-fit: contain;
-     object-fit: contain;
+  object-fit: contain;
   filter: grayscale(100%) opacity(0.7);
   transition: all 0.3s ease;
 }
@@ -429,6 +447,7 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ===== 03. Works 區塊 ===== */
 .work-section {
   max-width: 900px;
   margin: 0 auto;
@@ -526,8 +545,7 @@ html {
 .work-section .project-preview-modal img {
   width: 100%;
   height: 100%;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
   display: block;
 }
 @media (max-width: 400px) {
@@ -536,6 +554,7 @@ html {
   }
 }
 
+/* ===== 04. Contact 區塊 ===== */
 .contact-section {
   max-width: 900px;
   margin: 0 auto;
@@ -623,39 +642,8 @@ html {
   color: #5dbbe0;
   font-weight: 700;
 }
-.contact-section .footer-divider .social-links {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-.contact-section .footer-divider .social-links a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
-}
-.contact-section .footer-divider .social-links a:hover {
-  transform: translateY(-3px);
-}
-.contact-section .footer-divider .social-links .social-icon {
-  width: 22px;
-  height: 22px;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
-}
-.contact-section .footer-divider .social-links .social-icon:hover {
-  opacity: 1;
-}
-.contact-section .footer-divider .social-links .social-icon.invert-white {
-  filter: invert(1);
-}
-@media (max-width: 768px) {
-  .contact-section .footer-divider {
-    flex-direction: column;
-    text-align: center;
-  }
-}
 
+/* 回到頂部按鈕 */
 .back-to-top-btn {
   position: fixed;
   bottom: 40px;
@@ -704,6 +692,7 @@ html {
   }
 }
 
+/* 區塊內距 */
 .about-section,
 .stack-section,
 .work-section,
@@ -721,6 +710,7 @@ html {
   }
 }
 
+/* 隱藏滾動條 */
 html, body {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -729,6 +719,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;
 }
 
+/* 滾動進度條 */
 .scroll-progress-container {
   position: fixed;
   right: 20px;
@@ -749,4 +740,159 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(100, 255, 218, 0.7);
   transition: height 0.1s ease-out;
-}/*# sourceMappingURL=index.css.map */
+}
+
+/* ==================================================== */
+/* ===== 亮色主題樣式 (Light Theme) 覆蓋 ===== */
+/* ==================================================== */
+body.light-theme {
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+/* 導覽列與背景 */
+body.light-theme .navbar {
+  background-color: rgba(255, 255, 255, 0.88);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+body.light-theme .navbar.scrolled {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+}
+body.light-theme .navbar .logo {
+  color: #2563eb;
+  border-color: #2563eb;
+}
+body.light-theme .navbar .nav-links ol li a {
+  color: #334155;
+}
+body.light-theme .navbar .nav-links ol li a:hover,
+body.light-theme .navbar .nav-links ol li a .nav-number {
+  color: #2563eb;
+}
+body.light-theme .navbar .nav-links .btn-resume {
+  color: #2563eb;
+  border-color: #2563eb;
+}
+body.light-theme .navbar .nav-links .btn-resume:hover {
+  background-color: rgba(37, 99, 235, 0.08);
+  box-shadow: 2px 2px 0 #2563eb;
+}
+body.light-theme .hamburger-btn .bar {
+  background-color: #2563eb;
+}
+@media (max-width: 768px) {
+  body.light-theme .navbar .nav-links {
+    background-color: #ffffff;
+    box-shadow: -10px 0px 30px -15px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* 標題與內文 */
+body.light-theme .numbered-heading {
+  color: #0f172a;
+}
+body.light-theme .numbered-heading .heading-number {
+  color: #2563eb;
+}
+body.light-theme .numbered-heading::after {
+  background-color: #cbd5e1;
+}
+body.light-theme .about-section .about-text p {
+  color: #475569;
+}
+
+/* 亮色主題頭像處理：保持藍色濾鏡與 Hover 變色彩色效果 */
+body.light-theme .about-section .about-pic .wrapper {
+  background-color: #abc8f7; /* 底層亮藍色 */
+  box-shadow: 0 10px 30px -15px rgba(37, 99, 235, 0.25);
+}
+
+body.light-theme .about-section .about-pic .wrapper::after {
+  border-color: #2563eb; /* 藍色外框 */
+}
+
+body.light-theme .about-section .about-pic .wrapper .img {
+  mix-blend-mode: multiply; /* 融入底層藍色 */
+  filter: grayscale(100%) contrast(1.1) brightness(1.1); /* 提升亮色下的對比與亮度 */
+  transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+/* ★ 滑鼠懸停 (Hover) 時：背景變透明、濾鏡消失，變回原本圖片色彩 */
+body.light-theme .about-section .about-pic .wrapper:hover {
+  background-color: transparent;
+  outline: 0;
+}
+
+body.light-theme .about-section .about-pic .wrapper:hover .img {
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+/* 技能卡片 */
+body.light-theme .stack-section .stack-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+body.light-theme .stack-section .stack-card .stack-name {
+  color: #475569;
+}
+body.light-theme .stack-section .stack-card:hover {
+  background-color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.15);
+}
+body.light-theme .stack-section .stack-card:hover .stack-name {
+  color: #0f172a;
+}
+
+/* 作品列表 */
+body.light-theme .work-section .project-item {
+  border-bottom-color: #e2e8f0;
+}
+body.light-theme .work-section .project-item .project-info .project-title {
+  color: #64748b;
+}
+body.light-theme .work-section .project-item:hover {
+  background-color: rgba(37, 99, 235, 0.04);
+}
+body.light-theme .work-section .project-item:hover .project-title,
+body.light-theme .work-section .project-item:hover .project-num {
+  color: #2563eb;
+  text-shadow: none;
+}
+body.light-theme .work-section .project-item .project-tags {
+  color: #64748b;
+}
+
+/* 聯絡區塊與頁尾 */
+body.light-theme .contact-section .contact-info-grid .info-block .info-label {
+  color: #0f172a;
+}
+body.light-theme .contact-section .contact-info-grid .info-block .info-value {
+  color: #475569;
+}
+body.light-theme .contact-section .contact-info-grid .info-block .info-value:hover {
+  color: #2563eb;
+}
+body.light-theme .contact-section .footer-divider {
+  border-top-color: #e2e8f0;
+}
+body.light-theme .contact-section .footer-divider .copyright {
+  color: #64748b;
+}
+body.light-theme .contact-section .footer-divider .copyright .highlight {
+  color: #2563eb;
+}
+
+/* 回到頂部按鈕 */
+body.light-theme .back-to-top-btn {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  color: #2563eb;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+body.light-theme .back-to-top-btn:hover {
+  background-color: #f1f5f9;
+  border-color: #2563eb;
+}
