@@ -4,8 +4,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vergil Hsieh, Web Developer</title>
+  <title id="doc-title">Vergil Hsieh, Web Developer</title>
   <link rel="stylesheet" href="index.css">
+
+  <style>
+    /* 語言切換按鈕樣式 (配合個人站科技暗色與霓虹綠風格) */
+    .btn-lang-toggle {
+      background: transparent;
+      border: 1px solid #64ffda;
+      color: #64ffda;
+      border-radius: 4px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.82rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      margin-left: 12px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-lang-toggle:hover {
+      background-color: rgba(100, 255, 218, 0.12);
+      box-shadow: 0 0 12px rgba(100, 255, 218, 0.35);
+      transform: translateY(-2px);
+    }
+
+    /* 手機版選單內的間距微調 */
+    @media (max-width: 768px) {
+      .btn-lang-toggle {
+        margin: 18px 0 0 0;
+        padding: 0.6rem 1.4rem;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -15,9 +51,9 @@
   </div>
 
   <!-- 右側懸浮膠囊滾動進度條 -->
-<div class="scroll-progress-container" id="scroll-progress-container">
-  <div class="scroll-progress-bar" id="scroll-progress-bar"></div>
-</div>
+  <div class="scroll-progress-container" id="scroll-progress-container">
+    <div class="scroll-progress-bar" id="scroll-progress-bar"></div>
+  </div>
 
   <!-- 導覽列 -->
   <header class="navbar" id="navbar">
@@ -35,12 +71,14 @@
       <!-- 導覽選單 -->
       <nav class="nav-links" id="nav-links">
         <ol>
-          <li><a href="#about"><span class="nav-number">01.</span>About</a></li>
-          <li><a href="#stack"><span class="nav-number">02.</span>My Stack</a></li>
-          <li><a href="#work"><span class="nav-number">03.</span>Works</a></li>
-          <li><a href="#contact"><span class="nav-number">04.</span>Contact</a></li>
+          <li><a href="#about"><span class="nav-number">01.</span><span id="nav-about">About</span></a></li>
+          <li><a href="#stack"><span class="nav-number">02.</span><span id="nav-stack">My Stack</span></a></li>
+          <li><a href="#work"><span class="nav-number">03.</span><span id="nav-work">Works</span></a></li>
+          <li><a href="#contact"><span class="nav-number">04.</span><span id="nav-contact">Contact</span></a></li>
         </ol>
-        <a href="/resume.pdf" class="btn-resume" target="_blank" rel="noopener noreferrer">Resume</a>
+        <a href="/resume.pdf" class="btn-resume" target="_blank" rel="noopener noreferrer" id="nav-resume">Resume</a>
+        <!-- 中英切換按鈕 -->
+        <button type="button" class="btn-lang-toggle" id="btn-lang" onclick="toggleLanguage()">繁中</button>
       </nav>
 
       <!-- 遮罩層 -->
@@ -49,21 +87,20 @@
   </header>
 
   <!-- 網頁主要內容 -->
-  <main style="height: 2000px; padding-top: 120px;">
+  <main style="min-height: 2000px; padding-top: 120px;">
     <!-- 01. About 區塊 -->
     <section id="about" class="about-section">
       <div class="about-inner">
         <!-- 左側：個人自述與技能清單 -->
         <div class="about-text">
           <h2 class="numbered-heading">
-            <span class="heading-number">01.</span> About Me
+            <span class="heading-number">01.</span> <span id="heading-about">About Me</span>
           </h2>
-          <p>
+          <p id="about-desc">
             Hello! I'm Vergil, a software engineer based in Taichung, Taiwan. I enjoy creating things that live on the
             internet, whether that be websites, applications, or anything in between. My goal is to always build
             products that provide pixel-perfect, performant experiences.
           </p>
-
         </div>
 
         <!-- 右側：個人形象照卡片 (經典霓虹綠濾鏡 + 邊框位移特效) -->
@@ -73,13 +110,12 @@
           </div>
         </div>
       </div>
-      <!-- 區塊標題 (含編號與延伸線) -->
     </section>
+
     <!-- 02. My Stack 區塊 -->
     <section id="stack" class="stack-section">
-      <!-- 區塊標題 (延用編號與延伸線樣式) -->
       <h2 class="numbered-heading">
-        <span class="heading-number">02.</span> My Stack
+        <span class="heading-number">02.</span> <span id="heading-stack">My Stack</span>
       </h2>
 
       <!-- 技能卡片網格 -->
@@ -111,8 +147,7 @@
         <!-- JavaScript -->
         <div class="stack-card">
           <div class="icon-box">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg"
-              alt="JavaScript" />
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JavaScript" />
           </div>
           <span class="stack-name">JavaScript</span>
         </div>
@@ -144,8 +179,7 @@
         <!-- GitHub -->
         <div class="stack-card">
           <div class="icon-box">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"
-              class="invert-dark" />
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" class="invert-dark" />
           </div>
           <span class="stack-name">GitHub</span>
         </div>
@@ -169,13 +203,12 @@
         <!-- Bootstrap -->
         <div class="stack-card">
           <div class="icon-box">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg"
-              alt="Bootstrap" />
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg" alt="Bootstrap" />
           </div>
           <span class="stack-name">Bootstrap</span>
         </div>
 
-<!-- Adobe Photoshop -->
+        <!-- Adobe Photoshop -->
         <div class="stack-card">
           <div class="icon-box">
             <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/photoshop/photoshop-original.svg" alt="Photoshop" class="adobe-icon" />
@@ -192,12 +225,13 @@
         </div>
       </div>
     </section>
+
     <!-- ========================================== -->
     <!-- 03. Work 區塊 (列表 Hover 浮現預覽圖動畫) -->
     <!-- ========================================== -->
     <section id="work" class="work-section">
       <h2 class="numbered-heading">
-        <span class="heading-number">03.</span> Works
+        <span class="heading-number">03.</span> <span id="heading-work">Works</span>
       </h2>
 
       <!-- 專案浮動預覽圖 (由 JS 控制跟隨與切換圖片) -->
@@ -212,32 +246,32 @@
           <div class="project-left">
             <span class="project-num">_01.</span>
             <div class="project-info">
-              <h3 class="project-title">Figma Hotel Web Design <span class="external-icon">↗</span></h3>
-              <p class="project-tags">Html <span>•</span> Figma <span>•</span> CSS</p>
+              <h3 class="project-title"><span id="proj-title-1">Figma Hotel Web Design</span> <span class="external-icon">↗</span></h3>
+              <p class="project-tags">Figma</p>
             </div>
           </div>
         </a>
 
         <!-- 專案 02 -->
-        <a href="https://github.com" target="_blank" class="project-item"
-          data-img="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80">
+        <a href="clock-v7.html" target="_blank" class="project-item"
+          data-img="images/Bootstrap clock V7 - 3D Real Globe工作區域 1.jpg">
           <div class="project-left">
             <span class="project-num">_02.</span>
             <div class="project-info">
-              <h3 class="project-title">Epikcart <span class="external-icon">↗</span></h3>
-              <p class="project-tags">React <span>•</span> Redux <span>•</span> React i18n</p>
+              <h3 class="project-title"><span id="proj-title-2">Bootstrap clock V7 - 3D Real Globe</span> <span class="external-icon">↗</span></h3>
+              <p class="project-tags">JS <span>•</span> Bootstrap <span>•</span> HTML <span>•</span> CSS</p>
             </div>
           </div>
         </a>
 
         <!-- 專案 03 -->
-        <a href="https://github.com" target="_blank" class="project-item"
-          data-img="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80">
+        <a href="test0010-super-lotto-add2NewFunctionsV2.html" target="_blank" class="project-item"
+          data-img="images/super lotto sim.jpg">
           <div class="project-left">
             <span class="project-num">_03.</span>
             <div class="project-info">
-              <h3 class="project-title">Resume Roaster <span class="external-icon">↗</span></h3>
-              <p class="project-tags">GPT-4 <span>•</span> Next.js <span>•</span> PostgreSQL</p>
+              <h3 class="project-title"><span id="proj-title-3">Super Lotto Sim</span> <span class="external-icon">↗</span></h3>
+              <p class="project-tags">RWD <span>•</span> JS <span>•</span> Bootstrap</p>
             </div>
           </div>
         </a>
@@ -248,7 +282,7 @@
           <div class="project-left">
             <span class="project-num">_04.</span>
             <div class="project-info">
-              <h3 class="project-title">Real Estate <span class="external-icon">↗</span></h3>
+              <h3 class="project-title"><span id="proj-title-4">Real Estate</span> <span class="external-icon">↗</span></h3>
               <p class="project-tags">React.js <span>•</span> Redux <span>•</span> Tailwind CSS</p>
             </div>
           </div>
@@ -260,7 +294,7 @@
           <div class="project-left">
             <span class="project-num">_05.</span>
             <div class="project-info">
-              <h3 class="project-title">Consulting Finance <span class="external-icon">↗</span></h3>
+              <h3 class="project-title"><span id="proj-title-5">Consulting Finance</span> <span class="external-icon">↗</span></h3>
               <p class="project-tags">HTML <span>•</span> CSS & SCSS <span>•</span> JavaScript</p>
             </div>
           </div>
@@ -273,73 +307,156 @@
     <!-- ========================================== -->
     <section id="contact" class="contact-section">
       <div class="contact-container">
-        <!-- 補上編號標題 (與 01, 02, 03 保持一致) -->
         <h2 class="numbered-heading">
-          <span class="heading-number">04.</span> Contact
+          <span class="heading-number">04.</span> <span id="heading-contact">Contact</span>
         </h2>
-        <br>
-        <br>
+        <br><br>
         <!-- 綠色膠囊按鈕 -->
         <div class="contact-cta">
           <a href="mailto:hsiehvergil@gmail.com" class="btn-send-message">
-            SEND MESSAGE <span>↗</span>
+            <span id="btn-send-text">SEND MESSAGE</span> <span>↗</span>
           </a>
         </div>
 
         <!-- 聯絡資訊網格 -->
         <div class="contact-info-grid">
-          <!-- <div class="info-block">
-            <span class="info-label">PHONE NUMBER</span>
-            <a href="tel:+886912345678" class="info-value">+886 912 345 678</a>
-          </div> -->
-
           <div class="info-block">
-            <span class="info-label">EMAIL</span>
-            <a href="mailto:your-email@example.com" class="info-value">hsiehvergil@gmail.com</a>
+            <span class="info-label" id="lbl-email">EMAIL</span>
+            <a href="mailto:hsiehvergil@gmail.com" class="info-value">hsiehvergil@gmail.com</a>
           </div>
 
           <div class="info-block">
-            <span class="info-label">LOCATION</span>
-            <span class="info-value">Taichung, Taiwan</span>
+            <span class="info-label" id="lbl-location">LOCATION</span>
+            <span class="info-value" id="val-location">Taichung, Taiwan</span>
           </div>
         </div>
 
-        <!-- 底部版權與社群連結 -->
+        <!-- 底部版權 -->
         <footer class="footer-divider">
           <div class="copyright">
-            © 2026 <span class="highlight">VERGIL HSIEH</span> All Rights Reserved.
+            © 2026 <span class="highlight">VERGIL HSIEH</span> <span id="txt-rights">All Rights Reserved.</span>
           </div>
-
-          <!-- <div class="social-links">
-            <a href="https://github.com" target="_blank" aria-label="GitHub">
-              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"
-                class="social-icon invert-white" />
-            </a>
-            <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn">
-              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg"
-                alt="LinkedIn" class="social-icon" />
-            </a>
-            <a href="https://figma.com" target="_blank" aria-label="Figma">
-              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" alt="Figma"
-                class="social-icon" />
-            </a>
-          </div> -->
         </footer>
       </div>
     </section>
   </main>
-
 
   <!-- 右下角 Go To Top 懸浮按鈕 -->
   <button id="back-to-top" class="back-to-top-btn" aria-label="Back to top">
     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="18 15 12 9 6 15"></polyline>
-    </svg>GO TOP
+    </svg><span id="txt-gotop">GO TOP</span>
   </button>
 
   <!-- 統一引入單一 JS 檔案 -->
   <script src="main.js"></script>
+
+  <!-- 多語系切換模組 (與 clock-v7 機制保持一致) -->
+  <script>
+    let currentLang = localStorage.getItem('site_lang') || 'en';
+
+    const siteI18n = {
+      en: {
+        docTitle: "Vergil Hsieh, Web Developer",
+        btnLang: "繁中",
+        navAbout: "About",
+        navStack: "My Stack",
+        navWork: "Works",
+        navContact: "Contact",
+        navResume: "Resume",
+        headingAbout: "About Me",
+        aboutDesc: "Hello! I'm Vergil, a software engineer based in Taichung, Taiwan. I enjoy creating things that live on the internet, whether that be websites, applications, or anything in between. My goal is to always build products that provide pixel-perfect, performant experiences.",
+        headingStack: "My Stack",
+        headingWork: "Works",
+        projTitle1: "Figma Hotel Web Design",
+        projTitle2: "Bootstrap clock V7 - 3D Real Globe",
+        projTitle3: "Super Lotto Sim",
+        projTitle4: "Real Estate",
+        projTitle5: "Consulting Finance",
+        headingContact: "Contact",
+        btnSendMessage: "SEND MESSAGE",
+        lblEmail: "EMAIL",
+        lblLocation: "LOCATION",
+        valLocation: "Taichung, Taiwan",
+        txtRights: "All Rights Reserved.",
+        txtGoTop: "GO TOP"
+      },
+      zh: {
+        docTitle: "謝枘達 | 網頁前端工程師 (Vergil Hsieh)",
+        btnLang: "EN",
+        navAbout: "關於我",
+        navStack: "核心技術",
+        navWork: "精選作品",
+        navContact: "聯絡方式",
+        navResume: "個人履歷",
+        headingAbout: "關於我",
+        aboutDesc: "你好！我是 Vergil，現居台灣台中的軟體工程師。我熱愛在網路世界中創造充滿互動性與美感的數位產品，無論是形象網站、前端應用程式或系統介面。我的目標始終是打造出兼具像素級精緻度與極致流暢效能的使用者體驗。",
+        headingStack: "技術與工具",
+        headingWork: "精選專案作品",
+        projTitle1: "Figma 飯店主題網頁介面設計",
+        projTitle2: "Bootstrap 3D旋轉地球 多功能時鐘 V7",
+        projTitle3: "威力彩．熱帶小島大尋寶模擬器",
+        projTitle4: "房地產經紀展示平台",
+        projTitle5: "金融顧問諮詢形象官網",
+        headingContact: "與我聯繫",
+        btnSendMessage: "發送信件交流",
+        lblEmail: "電子郵件",
+        lblLocation: "所在城市",
+        valLocation: "台灣，台中市",
+        txtRights: "版權所有，保留一切權利。",
+        txtGoTop: "回到頂部"
+      }
+    };
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'en' ? 'zh' : 'en';
+      localStorage.setItem('site_lang', currentLang);
+      applyLanguage();
+    }
+
+    function applyLanguage() {
+      const t = siteI18n[currentLang];
+
+      document.documentElement.lang = currentLang === 'zh' ? 'zh-Hant' : 'en';
+      document.getElementById('doc-title').innerText = t.docTitle;
+      document.getElementById('btn-lang').innerText = t.btnLang;
+
+      // 導覽選單
+      document.getElementById('nav-about').innerText = t.navAbout;
+      document.getElementById('nav-stack').innerText = t.navStack;
+      document.getElementById('nav-work').innerText = t.navWork;
+      document.getElementById('nav-contact').innerText = t.navContact;
+      document.getElementById('nav-resume').innerText = t.navResume;
+
+      // 區塊標題與介紹內文
+      document.getElementById('heading-about').innerText = t.headingAbout;
+      document.getElementById('about-desc').innerText = t.aboutDesc;
+      document.getElementById('heading-stack').innerText = t.headingStack;
+      document.getElementById('heading-work').innerText = t.headingWork;
+
+      // 作品名稱
+      document.getElementById('proj-title-1').innerText = t.projTitle1;
+      document.getElementById('proj-title-2').innerText = t.projTitle2;
+      document.getElementById('proj-title-3').innerText = t.projTitle3;
+      document.getElementById('proj-title-4').innerText = t.projTitle4;
+      document.getElementById('proj-title-5').innerText = t.projTitle5;
+
+      // 聯絡區塊
+      document.getElementById('heading-contact').innerText = t.headingContact;
+      document.getElementById('btn-send-text').innerText = t.btnSendMessage;
+      document.getElementById('lbl-email').innerText = t.lblEmail;
+      document.getElementById('lbl-location').innerText = t.lblLocation;
+      document.getElementById('val-location').innerText = t.valLocation;
+      document.getElementById('txt-rights').innerText = t.txtRights;
+      document.getElementById('txt-gotop').innerText = t.txtGoTop;
+    }
+
+    // 初始化語言
+    document.addEventListener("DOMContentLoaded", () => {
+      applyLanguage();
+    });
+  </script>
 </body>
 
 </html>

@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap clock V7 - 3D Real Globe</title>
+
+    <!-- Bootstrap 5.2 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.compat.min.css">
+
+    <!-- Three.js 3D 輕量核心引擎 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Google 字型 Rowdies 與 CSS 樣式 -->
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css2?family=Rowdies:wght@300;400;700&display=swap');
+
+        ::selection {
+            background-color: rgba(0, 180, 255, 0.4);
+            color: #ffffff;
+        }
+
+        body {
+            background-color: #030611;
+            padding-top: 20px;
+            padding-bottom: 40px;
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 動態流星與星空 Canvas 畫布 */
+        #meteorCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* 3D WebGL 地球容器：860px 充裕空間，光暈柔和不切邊 */
+        #globeContainer {
+            position: fixed;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -55%);
+            width: 860px;
+            height: 860px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        #globeContainer canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* 主卡片毛玻璃質感 */
+        .card {
+            background-color: rgba(10, 15, 28, 0.32) !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .card-body {
+            background-color: rgba(255, 255, 255, 0.88) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .clockArea {
+            width: 100%;
+            height: 420px;
+            background-image: radial-gradient(rgba(0, 0, 0, 0.2), rgba(20, 25, 40, 0.35));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        #dateTitle {
+            color: #ffffff !important;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.9), 0 0 4px rgba(255, 255, 255, 0.8);
+            margin-bottom: 12px;
+            user-select: none;
+        }
+
+        .digital-clock {
+            width: 65%;
+            padding: 20px 10px;
+            color: #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            font-family: 'Rowdies', Arial, Helvetica, sans-serif;
+            font-size: 4.8vw;
+            font-weight: 400;
+            letter-spacing: 2px;
+            background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(30, 35, 45, 0.7));
+            text-shadow: 0 0 8px #ff0;
+            user-select: none;
+            transition: font-weight 0.2s ease;
+            font-variant-numeric: tabular-nums;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .btn-custom-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .top-action-bar {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+            display: flex;
+            gap: 6px;
+        }
+
+        .timezone-box {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 10;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        #tzSelect {
+            cursor: pointer;
+            width: 175px;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        #tzSelect:hover {
+            background-color: #343a40 !important;
+            border-color: #adb5bd !important;
+        }
+
+        #btnManageCity {
+            color: #00ffff !important;
+            border: 1px solid #00ffff !important;
+            background-color: rgba(0, 255, 255, 0.12) !important;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        #btnManageCity:hover {
+            background-color: #00ffff !important;
+            color: #030611 !important;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        #btnLangToggle {
+            color: #70c5ff !important;
+            border: 1px solid #70c5ff !important;
+            background-color: rgba(112, 197, 255, 0.12) !important;
+            transition: all 0.2s ease;
+        }
+
+        #btnLangToggle:hover {
+            color: #0b0c16 !important;
+            background-color: #70c5ff !important;
+            box-shadow: 0 0 10px rgba(112, 197, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 2D 星空與流星背景畫布 -->
+    <canvas id="meteorCanvas"></canvas>
+
+    <!-- 真實 3D WebGL 地球容器 -->
+    <div id="globeContainer"></div>
+
+    <div class="container">
+        <div class="row text-center">
+            <div class="card col-sm-8 mx-auto p-0 shadow">
+
+                <div class="clockArea" id="clockArea">
+                    <div class="timezone-box" id="timezoneWrap">
+                        <select class="form-select form-select-sm bg-dark text-white border-secondary" id="tzSelect"
+                            onchange="changeTimezone()">
+                            <optgroup label="內建城市 (Built-in)" id="builtInGroup">
+                                <option value="local" selected id="optLocal">本地時間 (Local)</option>
+                                <option value="Asia/Taipei" id="optTpe">台北 (UTC+8)</option>
+                                <option value="Asia/Tokyo" id="optTyo">東京 (UTC+9)</option>
+                                <option value="Asia/Seoul" id="optSel">首爾 (UTC+9)</option>
+                                <option value="Europe/London" id="optLon">倫敦 (UTC+0/+1)</option>
+                                <option value="Europe/Paris" id="optPar">巴黎 (UTC+1/+2)</option>
+                                <option value="America/New_York" id="optNyc">紐約 (UTC-5/-4)</option>
+                                <option value="America/Los_Angeles" id="optLax">洛杉磯 (UTC-8/-7)</option>
+                                <option value="Australia/Sydney" id="optSyd">雪梨 (UTC+10/+11)</option>
+                            </optgroup>
+                            <optgroup label="自訂城市 (Custom)" id="customGroup" style="display:none;"></optgroup>
+                        </select>
+                        <button type="button" class="btn btn-sm" id="btnManageCity" data-bs-toggle="modal"
+                            data-bs-target="#cityModal" title="管理/新增自訂城市">➕ 城市</button>
+                    </div>
+
+                    <div class="top-action-bar">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-light btn-sm active" id="modeClockBtn"
+                                onclick="switchMode('clock')">時鐘</button>
+                            <button type="button" class="btn btn-outline-light btn-sm" id="modeSwBtn"
+                                onclick="switchMode('stopwatch')">馬錶</button>
+                            <button type="button" class="btn btn-outline-light btn-sm" id="modeCdBtn"
+                                onclick="switchMode('countdown')">倒數計時</button>
+                        </div>
+                        <button type="button" class="btn btn-sm fw-bold" id="btnLangToggle"
+                            onclick="toggleLanguage()">EN</button>
+                    </div>
+
+                    <h5 name="title" id="dateTitle">Hello, world!</h5>
+                    <div class="digital-clock" id="mainDisplay">00:00:00 AM</div>
+                </div>
+
+                <div class="card-body">
+                    <svg id="bsIcon" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                        class="bi bi-alarm animated wobble infinite mx-auto" viewBox="0 0 16 16"
+                        style="width: 8%; display: none; margin-bottom: 10px;">
+                        <path
+                            d="M8.5 5.5a.5.5 0 0 0-1 0v3.362l-1.429 2.38a.5.5 0 1 0 .858.515l1.5-2.5A.5.5 0 0 0 8.5 9z" />
+                        <path
+                            d="M6.5 0a.5.5 0 0 0 0 1H7v1.07a7.001 7.001 0 0 0-3.273 12.474l-.602.602a.5.5 0 0 0 .707.708l.746-.746A6.97 6.97 0 0 0 8 16a6.97 6.97 0 0 0 3.422-.892l.746.746a.5.5 0 0 0 .707-.708l-.601-.602A7.001 7.001 0 0 0 9 2.07V1h.5a.5.5 0 0 0 0-1zm1.038 3.018a6 6 0 0 1 .924 0 6 6 0 1 1-.924 0M0 3.5c0 .753.333 1.429.86 1.887A8.04 8.04 0 0 1 4.387 1.86 2.5 2.5 0 0 0 3.5 13.5 1c-.753 0-1.429.333-1.887.86a8.04 8.04 0 0 1-3.527 3.527A2.5 2.5 0 0 0 13.5 1" />
+                    </svg>
+
+                    <h5 class="card-title fw-bold" id="panelTitle">JS測試：系統時鐘小程式</h5>
+                    <p class="card-text text-muted" id="panelSubtext">系統時鐘、碼錶與倒數計時器整合面板</p>
+
+                    <div id="clockControls" class="btn-custom-wrap">
+                        <button type="button" class="btn btn-outline-primary" id="btnFormat">24時制更換</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnClockStop">停止</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnHideDate">隱藏日期標題</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnCdate">變更民國日期標題</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnFontWeight"
+                            onclick="chgFontWeight()">字體：一般</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnClockBg"
+                            onclick="chgBackground()">變更背景顏色</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnClockShadow"
+                            onclick="chgTextShadow()">變更字體陰影</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnAlarmSetting"
+                            data-bs-toggle="modal" data-bs-target="#exampleModal">鬧鈴設定</button>
+                    </div>
+
+                    <div id="stopwatchControls" class="btn-custom-wrap" style="display: none;">
+                        <button type="button" class="btn btn-outline-primary" id="btnSwStart">啟動</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnSwReset">重設</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnSwRecord">記憶(0)</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnSwQuery" data-bs-toggle="modal"
+                            data-bs-target="#swModal">查詢</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnSwWeight"
+                            onclick="chgFontWeight()">變更字體粗細</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnSwBg"
+                            onclick="chgBackground()">變更背景顏色</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnSwShadow"
+                            onclick="chgTextShadow()">變更字體陰影</button>
+                    </div>
+
+                    <div id="countdownControls" style="display: none;">
+                        <div class="row g-2 justify-content-center mb-3">
+                            <div class="col-auto">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text" id="labelCdHour">時</span>
+                                    <input type="number" id="cdHourInput" class="form-control" min="0" max="99"
+                                        value="0" style="width: 70px;">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text" id="labelCdMin">分</span>
+                                    <input type="number" id="cdMinInput" class="form-control" min="0" max="59" value="0"
+                                        style="width: 70px;">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text" id="labelCdSec">秒</span>
+                                    <input type="number" id="cdSecInput" class="form-control" min="0" max="59"
+                                        value="10" style="width: 70px;">
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnCdApply"
+                                    onclick="setCountdownFromInputs()">套用時間</button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-1 mb-3">
+                            <button type="button" class="btn btn-outline-dark btn-sm" id="btnCdPlus10"
+                                onclick="addCountdownSeconds(10)">+10 秒</button>
+                            <button type="button" class="btn btn-outline-dark btn-sm" id="btnCdPlus30"
+                                onclick="addCountdownSeconds(30)">+30 秒</button>
+                            <button type="button" class="btn btn-outline-dark btn-sm" id="btnCdPlus60"
+                                onclick="addCountdownSeconds(60)">+1 分鐘</button>
+                            <button type="button" class="btn btn-outline-dark btn-sm" id="btnCdPlus300"
+                                onclick="addCountdownSeconds(300)">+5 分鐘</button>
+                        </div>
+
+                        <div class="btn-custom-wrap">
+                            <button type="button" class="btn btn-outline-primary" id="btnCdStart">開始倒數</button>
+                            <button type="button" class="btn btn-outline-primary" id="btnCdReset">重設</button>
+                            <button type="button" class="btn btn-outline-primary" id="btnCdWeight"
+                                onclick="chgFontWeight()">變更字體粗細</button>
+                            <button type="button" class="btn btn-outline-primary" id="btnCdBg"
+                                onclick="chgBackground()">變更背景顏色</button>
+                            <button type="button" class="btn btn-outline-primary" id="btnCdShadow"
+                                onclick="chgTextShadow()">變更字體陰影</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 0: 自訂城市管理視窗 (支援單欄輸入自動抓取) -->
+    <div class="modal fade" id="cityModal" tabindex="-1" aria-labelledby="cityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fs-5" id="cityModalLabel">🌍 自訂城市管理</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+
+                        <!-- 單一城市名稱快速自動新增區 -->
+                        <div class="card mb-3 border-primary shadow-sm">
+                            <div class="card-body bg-light text-start p-3">
+                                <label class="form-label fw-bold mb-1" id="lblCityInputGuide">城市名稱（只需輸入地名，自動獲取時區與經緯度）：</label>
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-8 col-sm-9">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark text-white border-secondary">🔍 城市</span>
+                                            <input type="text" id="autoCityName" class="form-control"
+                                                placeholder="例如：Moscow、杜拜、舊金山、柏林、曼谷"
+                                                onkeydown="if(event.key==='Enter') searchAndAddCity()">
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-sm-3">
+                                        <button type="button" class="btn btn-primary w-100" id="btnAutoAddCity"
+                                            onclick="searchAndAddCity()">
+                                            <span id="addCitySpinner" class="spinner-border spinner-border-sm me-1"
+                                                style="display:none;"></span>
+                                            <span id="lblBtnAddCity">自動新增</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="citySearchStatus" class="small mt-2" style="display:none;"></div>
+
+                                <!-- 快速填入標籤 -->
+                                <div class="d-flex flex-wrap gap-1 align-items-center mt-2">
+                                    <span class="small text-muted" id="lblQuickPresets">快速點選試用：</span>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2"
+                                        onclick="quickFillAndAdd('Moscow')">莫斯科 (Moscow)</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2"
+                                        onclick="quickFillAndAdd('Dubai')">杜拜 (Dubai)</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2"
+                                        onclick="quickFillAndAdd('Singapore')">新加坡 (Singapore)</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2"
+                                        onclick="quickFillAndAdd('Berlin')">柏林 (Berlin)</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2"
+                                        onclick="quickFillAndAdd('San Francisco')">舊金山 (San Francisco)</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2"
+                                        onclick="quickFillAndAdd('São Paulo')">聖保羅 (São Paulo)</button>
+                                </div>
+
+                                <!-- 手動進階設定摺疊開關 -->
+                                <div class="mt-2 text-end">
+                                    <a class="small text-decoration-none" data-bs-toggle="collapse"
+                                        href="#manualCityCollapse" role="button" aria-expanded="false"
+                                        aria-controls="manualCityCollapse" id="toggleManualMode">
+                                        ⚙️ 切換為手動指定經緯度 / 時區代碼
+                                    </a>
+                                </div>
+
+                                <!-- 手動指定經緯度折疊區 -->
+                                <div class="collapse mt-2" id="manualCityCollapse">
+                                    <hr class="my-2">
+                                    <form id="manualCityForm" class="row g-2 align-items-end text-start">
+                                        <div class="col-sm-3">
+                                            <label class="small text-muted">城市名稱</label>
+                                            <input type="text" class="form-control form-control-sm" id="manCityName"
+                                                placeholder="例: Moscow">
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <label class="small text-muted">IANA 時區</label>
+                                            <input type="text" class="form-control form-control-sm" id="manCityTz"
+                                                placeholder="Europe/Moscow">
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <label class="small text-muted">緯度 (-90~90)</label>
+                                            <input type="number" step="0.0001" min="-90" max="90"
+                                                class="form-control form-control-sm" id="manCityLat" placeholder="55.7558">
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <label class="small text-muted">經度 (-180~180)</label>
+                                            <input type="number" step="0.0001" min="-180" max="180"
+                                                class="form-control form-control-sm" id="manCityLon" placeholder="37.6173">
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <button type="button" class="btn btn-secondary btn-sm w-100"
+                                                onclick="addManualCity()">手動加入</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 已儲存城市列表 -->
+                        <h6 class="text-start fw-bold" id="lblSavedCities">已儲存的自訂城市</h6>
+                        <table class="table table-bordered table-hover text-center align-middle" id="customCityTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 25%;" id="thCityName">城市名稱</th>
+                                    <th style="width: 30%;" id="thCityTz">時區 (IANA)</th>
+                                    <th style="width: 25%;" id="thCityCoords">座標 (緯度, 經度)</th>
+                                    <th style="width: 20%;" id="thCityAction">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customCityTbody"></tbody>
+                        </table>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnClearAllCities"
+                        onclick="clearAllCustomCities()">刪除所有自訂城市</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 1: 鬧鈴設定視窗 -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">鬧鈴設定</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row text-center mb-2">
+                            <form id="timerForm1" name="timerForm1" style="display: flex; width: 100%; gap: 6px;">
+                                <div class="col-3">
+                                    <input id="remark" name="remark" class="form-control" type="text" placeholder="備註"
+                                        required>
+                                </div>
+                                <div class="col">
+                                    <select id="hour" name="hour" class="form-select"></select>
+                                </div>
+                                <div class="col">
+                                    <select id="minutes" name="minutes" class="form-select"></select>
+                                </div>
+                                <div class="col">
+                                    <select id="seconds" name="seconds" class="form-select"></select>
+                                </div>
+                                <div class="col-3 d-flex gap-1">
+                                    <button id="addBtn" type="button" class="btn btn-primary w-100"
+                                        onclick="appendTimer()">新增</button>
+                                    <button type="reset" class="btn btn-info text-white w-100"
+                                        id="btnClearForm">清除</button>
+                                </div>
+                            </form>
+                        </div>
+                        <hr>
+                        <table id="timerList" class="table text-center align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <td>#</td>
+                                    <td id="thAlarmRemark">說明</td>
+                                    <td id="thAlarmTime">時間 (時:分:秒)</td>
+                                    <td id="thAlarmActive">是否啟動</td>
+                                    <td id="thAlarmAction">操作</td>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyId"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" id="btnClearAllAlarms"
+                        onclick="clearTimer()">刪除所有鬧鈴設定</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: 馬錶記憶查詢視窗 -->
+    <div class="modal fade" id="swModal" tabindex="-1" aria-labelledby="swModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fs-5" id="swModalLabel">馬錶記憶查詢設定</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <form id="swEditForm" class="row g-2 align-items-center mb-3 p-3 bg-light rounded"
+                            style="display:none;">
+                            <input type="hidden" id="editSwIndex">
+                            <div class="col-sm-3">
+                                <label class="small text-muted" id="lblSwEditMin">設定分鐘</label>
+                                <select id="editSwMinute" class="form-select form-select-sm"></select>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="small text-muted" id="lblSwEditSec">設定秒鐘</label>
+                                <select id="editSwSecond" class="form-select form-select-sm"></select>
+                            </div>
+                            <div class="col-sm-3">
+                                <label class="small text-muted" id="lblSwEditMs">設定1/10秒鐘</label>
+                                <select id="editSwMs" class="form-select form-select-sm"></select>
+                            </div>
+                            <div class="col-sm-3 d-flex align-items-end gap-1 mt-4">
+                                <button type="button" class="btn btn-primary btn-sm w-100"
+                                    id="btnSaveSwEdit">儲存</button>
+                                <button type="button" class="btn btn-info text-white btn-sm w-100"
+                                    id="btnCancelSwEdit" onclick="cancelSwEdit()">取消</button>
+                            </div>
+                        </form>
+
+                        <table class="table table-bordered table-hover text-center align-middle" id="swTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 20%;" id="thSwId">編號</th>
+                                    <th style="width: 45%;" id="thSwTime">時間</th>
+                                    <th style="width: 35%;" id="thSwAction">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="swTbodyId"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" id="btnClearAllSw"
+                        onclick="clearAllSwRecords()">清除所有記憶設定</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 工具函式 -->
+    <script type="text/javascript">
+        function addZero(num) {
+            return num < 10 ? '0' + num : '' + num;
+        }
+
+        function rand(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function setCookie(cname, cvalue, exdays) {
+            const d = new Date();
+            d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+            let expires = "expires=" + d.toUTCString();
+            document.cookie = cname + "=" + encodeURIComponent(JSON.stringify(cvalue)) + ";" + expires + ";path=/";
+        }
+
+        function getCookie(cname) {
+            let name = cname + "=";
+            let ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(name) === 0) {
+                    try {
+                        return JSON.parse(decodeURIComponent(c.substring(name.length, c.length)));
+                    } catch (e) {
+                        return [];
+                    }
+                }
+            }
+            return [];
+        }
+
+        function deleteCookie(cname) {
+            document.cookie = cname + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+
+        function playBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.value = 880;
+
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.8);
+            } catch (e) { }
+        }
+
+        function showAlarmBanner(title, remark, timeStr) {
+            let oldBanner = document.getElementById("alarmBannerAlert");
+            if (oldBanner) oldBanner.remove();
+
+            let banner = document.createElement("div");
+            banner.id = "alarmBannerAlert";
+            banner.className = "alert alert-danger alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3 shadow-lg";
+            banner.style.zIndex = "9999";
+            banner.style.minWidth = "340px";
+            banner.innerHTML = `
+                <strong>⏰ ${title}</strong><br>
+                ${currentLang === 'zh' ? '時間' : 'Time'}：${timeStr} ｜ ${currentLang === 'zh' ? '備註' : 'Note'}：${remark}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(banner);
+        }
+    </script>
+
+    <!-- 多語系字典與介面控制 -->
+    <script type="text/javascript">
+        let currentLang = 'zh';
+
+        const i18n = {
+            zh: {
+                langBtn: "EN",
+                modeClock: "時鐘",
+                modeSw: "馬錶",
+                modeCd: "倒數計時",
+                panelClockTitle: "JS測試：系統時鐘小程式",
+                panelSwTitle: "JS測試：馬錶小程式",
+                panelCdTitle: "JS測試：倒數計時小程式",
+                panelSubtext: "系統時鐘、碼錶與倒數計時器整合面板",
+                btn12H: "12時制更換",
+                btn24H: "24時制更換",
+                btnStop: "停止",
+                btnStart: "啟動",
+                btnHideDate: "隱藏日期標題",
+                btnShowDate: "顯示日期標題",
+                btnCdateROC: "變更民國日期標題",
+                btnCdateAD: "變更西元日期標題",
+                btnWeightNormal: "字體：一般",
+                btnWeightBold: "字體：粗體",
+                btnWeightLight: "字體：細體",
+                btnChangeWeight: "變更字體粗細",
+                btnChangeBg: "變更背景顏色",
+                btnChangeShadow: "變更字體陰影",
+                btnAlarmSetting: "鬧鈴設定",
+                btnQuery: "查詢",
+                btnCdStart: "開始倒數",
+                btnCdPause: "暫停",
+                btnReset: "重設",
+                labelCdHour: "時",
+                labelCdMin: "分",
+                labelCdSec: "秒",
+                btnCdApply: "套用時間",
+                plus10s: "+10 秒",
+                plus30s: "+30 秒",
+                plus1m: "+1 分鐘",
+                plus5m: "+5 分鐘",
+                alarmTitle: "鬧鈴設定",
+                remarkPlaceholder: "備註",
+                btnAdd: "新增",
+                btnClear: "清除",
+                thRemark: "說明",
+                thTime: "時間 (時:分:秒)",
+                thActive: "是否啟動",
+                thAction: "操作",
+                btnClearAllAlarms: "刪除所有鬧鈴設定",
+                swTitle: "馬錶記憶查詢設定",
+                lblSwEditMin: "設定分鐘",
+                lblSwEditSec: "設定秒鐘",
+                lblSwEditMs: "設定1/10秒鐘",
+                btnSave: "儲存",
+                btnCancel: "取消",
+                btnEdit: "修改",
+                btnDelete: "刪除",
+                btnClearAllSw: "清除所有記憶設定",
+                alarmTriggerTitle: "鬧鐘時間到了！",
+                cdEndTitle: "倒數計時結束！",
+                cdEndRemark: "時間已到！",
+                defaultAlarmRemark: "未命名提醒",
+                swEmpty: "暫無記憶資料",
+                optLocal: "本地時間 (Local)",
+                optTpe: "台北 (UTC+8)",
+                optTyo: "東京 (UTC+9)",
+                optSel: "首爾 (UTC+9)",
+                optLon: "倫敦 (UTC+0/+1)",
+                optPar: "巴黎 (UTC+1/+2)",
+                optNyc: "紐約 (UTC-5/-4)",
+                optLax: "洛杉磯 (UTC-8/-7)",
+                optSyd: "雪梨 (UTC+10/+11)",
+                swRecordBtnPrefix: "記憶",
+                alarmSwitchLabel: "啟動",
+                confirmDelAlarm: "確認刪除該鬧鐘設定？",
+                confirmClearAllAlarms: "確認清除所有鬧鐘設定？",
+                confirmDelSw: "確認刪除該記憶設定？",
+                confirmClearAllSw: "確認清除所有記憶設定？",
+                // 城市管理語系
+                btnManageCity: "➕ 城市",
+                cityModalTitle: "🌍 自訂城市管理",
+                lblCityInputGuide: "城市名稱（只需輸入地名，自動獲取時區與經緯度）：",
+                lblBtnAddCity: "自動新增",
+                lblQuickPresets: "快速點選試用：",
+                toggleManualMode: "⚙️ 切換為手動指定經緯度 / 時區代碼",
+                lblSavedCities: "已儲存的自訂城市",
+                thCityName: "城市名稱",
+                thCityTz: "時區 (IANA)",
+                thCityCoords: "座標 (緯度, 經度)",
+                thCityAction: "操作",
+                btnClearAllCities: "刪除所有自訂城市",
+                btnSwitchToCity: "切換",
+                cityEmpty: "目前尚無自訂城市，請在上方輸入城市名稱快速新增！",
+                confirmDelCity: "確認刪除此自訂城市？",
+                confirmClearAllCities: "確認刪除所有自訂城市？"
+            },
+            en: {
+                langBtn: "繁中",
+                modeClock: "Clock",
+                modeSw: "Stopwatch",
+                modeCd: "Countdown",
+                panelClockTitle: "JS Demo: System Clock",
+                panelSwTitle: "JS Demo: Stopwatch",
+                panelCdTitle: "JS Demo: Countdown Timer",
+                panelSubtext: "Integrated Panel for Clock, Stopwatch & Countdown",
+                btn12H: "Switch to 12H",
+                btn24H: "Switch to 24H",
+                btnStop: "Stop",
+                btnStart: "Start",
+                btnHideDate: "Hide Date",
+                btnShowDate: "Show Date",
+                btnCdateROC: "Switch to ROC Date",
+                btnCdateAD: "Switch to AD Date",
+                btnWeightNormal: "Weight: Normal",
+                btnWeightBold: "Weight: Bold",
+                btnWeightLight: "Weight: Light",
+                btnChangeWeight: "Change Weight",
+                btnChangeBg: "Change Background",
+                btnChangeShadow: "Change Shadow",
+                btnAlarmSetting: "Alarm Settings",
+                btnQuery: "Records",
+                btnCdStart: "Start",
+                btnCdPause: "Pause",
+                btnReset: "Reset",
+                labelCdHour: "Hr",
+                labelCdMin: "Min",
+                labelCdSec: "Sec",
+                btnCdApply: "Apply",
+                plus10s: "+10s",
+                plus30s: "+30s",
+                plus1m: "+1m",
+                plus5m: "+5m",
+                alarmTitle: "Alarm Settings",
+                remarkPlaceholder: "Note",
+                btnAdd: "Add",
+                btnClear: "Clear",
+                thRemark: "Note",
+                thTime: "Time (H:M:S)",
+                thActive: "Enabled",
+                thAction: "Action",
+                btnClearAllAlarms: "Clear All Alarms",
+                swTitle: "Stopwatch Records",
+                lblSwEditMin: "Set Minutes",
+                lblSwEditSec: "Set Seconds",
+                lblSwEditMs: "Set 1/10s",
+                btnSave: "Save",
+                btnCancel: "Cancel",
+                btnEdit: "Edit",
+                btnDelete: "Delete",
+                btnClearAllSw: "Clear All Records",
+                alarmTriggerTitle: "Alarm ringing!",
+                cdEndTitle: "Countdown ended!",
+                cdEndRemark: "Time's up!",
+                defaultAlarmRemark: "Reminder",
+                swEmpty: "No record yet",
+                optLocal: "Local Time",
+                optTpe: "Taipei (UTC+8)",
+                optTyo: "Tokyo (UTC+9)",
+                optSel: "Seoul (UTC+9)",
+                optLon: "London (UTC+0/+1)",
+                optPar: "Paris (UTC+1/+2)",
+                optNyc: "New York (UTC-5/-4)",
+                optLax: "Los Angeles (UTC-8/-7)",
+                optSyd: "Sydney (UTC+10/+11)",
+                swRecordBtnPrefix: "Lap",
+                alarmSwitchLabel: "Active",
+                confirmDelAlarm: "Delete this alarm?",
+                confirmClearAllAlarms: "Delete all alarms?",
+                confirmDelSw: "Delete this record?",
+                confirmClearAllSw: "Clear all records?",
+                // 城市管理語系
+                btnManageCity: "➕ City",
+                cityModalTitle: "🌍 Custom City Management",
+                lblCityInputGuide: "City Name (Coordinates & Timezone fetched automatically):",
+                lblBtnAddCity: "Auto Add",
+                lblQuickPresets: "Quick Presets:",
+                toggleManualMode: "⚙️ Switch to Manual Coordinates / Timezone",
+                lblSavedCities: "Saved Custom Cities",
+                thCityName: "City Name",
+                thCityTz: "Timezone (IANA)",
+                thCityCoords: "Coords (Lat, Lon)",
+                thCityAction: "Action",
+                btnClearAllCities: "Clear All Cities",
+                btnSwitchToCity: "Switch",
+                cityEmpty: "No custom cities yet. Type a city name above to add!",
+                confirmDelCity: "Delete this custom city?",
+                confirmClearAllCities: "Delete all custom cities?"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            applyUILanguage();
+        }
+
+        function applyUILanguage() {
+            const t = i18n[currentLang];
+
+            document.getElementById("btnLangToggle").innerText = t.langBtn;
+            document.getElementById("modeClockBtn").innerText = t.modeClock;
+            document.getElementById("modeSwBtn").innerText = t.modeSw;
+            document.getElementById("modeCdBtn").innerText = t.modeCd;
+            document.getElementById("panelSubtext").innerText = t.panelSubtext;
+
+            document.getElementById("optLocal").innerText = t.optLocal;
+            document.getElementById("optTpe").innerText = t.optTpe;
+            document.getElementById("optTyo").innerText = t.optTyo;
+            document.getElementById("optSel").innerText = t.optSel;
+            document.getElementById("optLon").innerText = t.optLon;
+            document.getElementById("optPar").innerText = t.optPar;
+            document.getElementById("optNyc").innerText = t.optNyc;
+            document.getElementById("optLax").innerText = t.optLax;
+            document.getElementById("optSyd").innerText = t.optSyd;
+
+            document.getElementById("btnFormat").innerText = (timeFormat === 12) ? t.btn24H : t.btn12H;
+            document.getElementById("btnClockStop").innerText = (clockInterval !== null) ? t.btnStop : t.btnStart;
+            document.getElementById("btnHideDate").innerText = dateHide ? t.btnHideDate : t.btnShowDate;
+            document.getElementById("btnCdate").innerText = cdate ? t.btnCdateAD : t.btnCdateROC;
+            document.getElementById("btnClockBg").innerText = t.btnChangeBg;
+            document.getElementById("btnClockShadow").innerText = t.btnChangeShadow;
+            document.getElementById("btnAlarmSetting").innerText = t.btnAlarmSetting;
+
+            document.getElementById("btnSwStart").innerText = isSwRunning ? t.btnStop : t.btnStart;
+            document.getElementById("btnSwReset").innerText = t.btnReset;
+            document.getElementById("btnSwQuery").innerText = t.btnQuery;
+            document.getElementById("btnSwWeight").innerText = t.btnChangeWeight;
+            document.getElementById("btnSwBg").innerText = t.btnChangeBg;
+            document.getElementById("btnSwShadow").innerText = t.btnChangeShadow;
+            updateSwBadge();
+
+            document.getElementById("labelCdHour").innerText = t.labelCdHour;
+            document.getElementById("labelCdMin").innerText = t.labelCdMin;
+            document.getElementById("labelCdSec").innerText = t.labelCdSec;
+            document.getElementById("btnCdApply").innerText = t.btnCdApply;
+            document.getElementById("btnCdPlus10").innerText = t.plus10s;
+            document.getElementById("btnCdPlus30").innerText = t.plus30s;
+            document.getElementById("btnCdPlus60").innerText = t.plus1m;
+            document.getElementById("btnCdPlus300").innerText = t.plus5m;
+            document.getElementById("btnCdStart").innerText = isCdRunning ? t.btnCdPause : t.btnCdStart;
+            document.getElementById("btnCdReset").innerText = t.btnReset;
+            document.getElementById("btnCdWeight").innerText = t.btnChangeWeight;
+            document.getElementById("btnCdBg").innerText = t.btnChangeBg;
+            document.getElementById("btnCdShadow").innerText = t.btnChangeShadow;
+
+            document.getElementById("exampleModalLabel").innerText = t.alarmTitle;
+            document.getElementById("remark").placeholder = t.remarkPlaceholder;
+            document.getElementById("addBtn").innerText = timerUpdate ? t.btnSave : t.btnAdd;
+            document.getElementById("btnClearForm").innerText = t.btnClear;
+            document.getElementById("thAlarmRemark").innerText = t.thRemark;
+            document.getElementById("thAlarmTime").innerText = t.thTime;
+            document.getElementById("thAlarmActive").innerText = t.thActive;
+            document.getElementById("thAlarmAction").innerText = t.thAction;
+            document.getElementById("btnClearAllAlarms").innerText = t.btnClearAllAlarms;
+
+            document.getElementById("swModalLabel").innerText = t.swTitle;
+            document.getElementById("lblSwEditMin").innerText = t.lblSwEditMin;
+            document.getElementById("lblSwEditSec").innerText = t.lblSwEditSec;
+            document.getElementById("lblSwEditMs").innerText = t.lblSwEditMs;
+            document.getElementById("btnSaveSwEdit").innerText = t.btnSave;
+            document.getElementById("btnCancelSwEdit").innerText = t.btnCancel;
+            document.getElementById("thSwId").innerText = "#";
+            document.getElementById("thSwTime").innerText = t.thTime;
+            document.getElementById("thSwAction").innerText = t.thAction;
+            document.getElementById("btnClearAllSw").innerText = t.btnClearAllSw;
+
+            // 城市介面文字更新
+            document.getElementById("btnManageCity").innerText = t.btnManageCity;
+            document.getElementById("cityModalLabel").innerText = t.cityModalTitle;
+            document.getElementById("lblCityInputGuide").innerText = t.lblCityInputGuide;
+            document.getElementById("lblBtnAddCity").innerText = t.lblBtnAddCity;
+            document.getElementById("lblQuickPresets").innerText = t.lblQuickPresets;
+            document.getElementById("toggleManualMode").innerText = t.toggleManualMode;
+            document.getElementById("lblSavedCities").innerText = t.lblSavedCities;
+            document.getElementById("thCityName").innerText = t.thCityName;
+            document.getElementById("thCityTz").innerText = t.thCityTz;
+            document.getElementById("thCityCoords").innerText = t.thCityCoords;
+            document.getElementById("thCityAction").innerText = t.thAction;
+            document.getElementById("btnClearAllCities").innerText = t.btnClearAllCities;
+
+            updateFontWeightButtonText();
+            switchMode(currentMode);
+            initAlarmSelects();
+            renderSwTable();
+            updateTimerForm();
+            renderCustomCityTable();
+            refreshCityDropdown();
+        }
+
+        function updateFontWeightButtonText() {
+            const t = i18n[currentLang];
+            const current = fontWeights[currentWeightIdx];
+            const btn = document.getElementById("btnFontWeight");
+            if (btn) {
+                if (current.weight === '400') btn.innerText = t.btnWeightNormal;
+                else if (current.weight === '700') btn.innerText = t.btnWeightBold;
+                else btn.innerText = t.btnWeightLight;
+            }
+        }
+    </script>
+
+    <!-- 城市經緯度、自動查詢與主控邏輯 -->
+    <script type="text/javascript">
+        const BUILTIN_COORDS = {
+            "local":               { lon: 121.56, lat: 25.03 },
+            "Asia/Taipei":        { lon: 121.56, lat: 25.03 },
+            "Asia/Tokyo":         { lon: 139.69, lat: 35.68 },
+            "Asia/Seoul":         { lon: 126.97, lat: 37.56 },
+            "Europe/London":      { lon: -0.12,  lat: 51.50 },
+            "Europe/Paris":       { lon: 2.35,   lat: 48.85 },
+            "America/New_York":   { lon: -74.00, lat: 40.71 },
+            "America/Los_Angeles":{ lon: -118.24,lat: 34.05 },
+            "Australia/Sydney":   { lon: 151.20, lat: -33.86 }
+        };
+
+        const CUSTOM_CITY_KEY = "customCities_v7";
+        let customCities = [];
+
+        function getCustomCities() {
+            try {
+                const stored = localStorage.getItem(CUSTOM_CITY_KEY);
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                return getCookie(CUSTOM_CITY_KEY) || [];
+            }
+        }
+
+        function saveCustomCities(list) {
+            customCities = list;
+            try {
+                localStorage.setItem(CUSTOM_CITY_KEY, JSON.stringify(list));
+            } catch (e) { }
+            setCookie(CUSTOM_CITY_KEY, list, 365);
+        }
+
+        let currentMode = 'clock';
+        let selectedTimezone = 'local';
+        let lastTriggeredSecondStamp = -1;
+
+        function getCityCoords(tz) {
+            if (BUILTIN_COORDS[tz]) return BUILTIN_COORDS[tz];
+            const custom = customCities.find(c => c.tz === tz);
+            if (custom) return { lat: custom.lat, lon: custom.lon };
+            return BUILTIN_COORDS["local"];
+        }
+
+        function changeTimezone() {
+            selectedTimezone = document.getElementById("tzSelect").value;
+            const targetCity = getCityCoords(selectedTimezone);
+
+            if (window.rotateEarthTo) {
+                window.rotateEarthTo(targetCity.lat, targetCity.lon);
+            }
+
+            clockUpdate();
+        }
+
+        function refreshCityDropdown() {
+            const customGroup = document.getElementById("customGroup");
+            if (!customGroup) return;
+
+            customGroup.innerHTML = "";
+            if (customCities.length > 0) {
+                customGroup.style.display = "";
+                customCities.forEach(c => {
+                    const opt = document.createElement("option");
+                    opt.value = c.tz;
+                    opt.innerText = `${c.name} (${c.tz})`;
+                    customGroup.appendChild(opt);
+                });
+            } else {
+                customGroup.style.display = "none";
+            }
+            document.getElementById("tzSelect").value = selectedTimezone;
+        }
+
+        function renderCustomCityTable() {
+            const tbody = document.getElementById("customCityTbody");
+            if (!tbody) return;
+            const t = i18n[currentLang];
+            tbody.innerHTML = "";
+
+            if (customCities.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-muted py-3">${t.cityEmpty}</td></tr>`;
+                return;
+            }
+
+            customCities.forEach((city, index) => {
+                let tr = document.createElement("tr");
+                const latStr = `${Math.abs(city.lat).toFixed(2)}°${city.lat >= 0 ? 'N' : 'S'}`;
+                const lonStr = `${Math.abs(city.lon).toFixed(2)}°${city.lon >= 0 ? 'E' : 'W'}`;
+
+                tr.innerHTML = `
+                    <td class="fw-bold">${city.name}</td>
+                    <td><span class="badge bg-dark">${city.tz}</span></td>
+                    <td class="small text-muted">${latStr}, ${lonStr}</td>
+                    <td>
+                        <button type="button" class="btn btn-outline-success btn-sm me-1" onclick="selectAndApplyCity('${city.tz}')">${t.btnSwitchToCity}</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="delCustomCity(${index})">${t.btnDelete}</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showCityStatus(msg, className) {
+            const statusEl = document.getElementById("citySearchStatus");
+            if (!statusEl) return;
+            statusEl.className = `small mt-2 ${className}`;
+            statusEl.innerText = msg;
+            statusEl.style.display = "block";
+        }
+
+        // 核心：透過名稱自動查找經緯度與時區
+        async function searchAndAddCity() {
+            const inputEl = document.getElementById("autoCityName");
+            const spinner = document.getElementById("addCitySpinner");
+            const btn = document.getElementById("btnAutoAddCity");
+
+            const cityName = inputEl.value.trim();
+            if (!cityName) {
+                showCityStatus("請先輸入城市名稱！", "text-danger");
+                inputEl.focus();
+                return;
+            }
+
+            btn.disabled = true;
+            spinner.style.display = "inline-block";
+            showCityStatus(`正在連線查詢「${cityName}」的地理與時區資料...`, "text-info");
+
+            try {
+                const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=zh&format=json`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.results || data.results.length === 0) {
+                    showCityStatus(`找不到城市「${cityName}」，請嘗試輸入英文名稱或常見中文譯名。`, "text-danger");
+                    return;
+                }
+
+                const city = data.results[0];
+                const displayName = city.name + (city.country ? ` (${city.country})` : '');
+                const lat = parseFloat(city.latitude.toFixed(4));
+                const lon = parseFloat(city.longitude.toFixed(4));
+                const tz = city.timezone;
+
+                if (!tz) {
+                    showCityStatus(`已找到座標（${lat}, ${lon}），但未取得標準時區，請嘗試展開手動指定。`, "text-warning");
+                    return;
+                }
+
+                // 驗證時區是否有效
+                try {
+                    new Intl.DateTimeFormat('en-US', { timeZone: tz }).format(new Date());
+                } catch (e) {
+                    showCityStatus(`取得的時區代碼「${tz}」瀏覽器不支援。`, "text-danger");
+                    return;
+                }
+
+                // 加入自訂清單（覆蓋同名或同時區）
+                customCities = customCities.filter(c => c.tz !== tz && c.name !== displayName);
+                customCities.push({
+                    name: displayName,
+                    tz: tz,
+                    lat: lat,
+                    lon: lon
+                });
+
+                saveCustomCities(customCities);
+                refreshCityDropdown();
+                renderCustomCityTable();
+
+                inputEl.value = "";
+                showCityStatus(`✅ 成功新增：${displayName} [${tz}]（緯度: ${lat}, 經度: ${lon}）`, "text-success");
+
+            } catch (err) {
+                console.error(err);
+                showCityStatus("網路連線查詢失敗，請檢查網路連線後再試。", "text-danger");
+            } finally {
+                btn.disabled = false;
+                spinner.style.display = "none";
+            }
+        }
+
+        function quickFillAndAdd(cityName) {
+            document.getElementById("autoCityName").value = cityName;
+            searchAndAddCity();
+        }
+
+        // 手動新增城市備援
+        function addManualCity() {
+            const name = document.getElementById("manCityName").value.trim();
+            const tz = document.getElementById("manCityTz").value.trim();
+            const lat = parseFloat(document.getElementById("manCityLat").value);
+            const lon = parseFloat(document.getElementById("manCityLon").value);
+
+            if (!name || !tz || isNaN(lat) || isNaN(lon)) {
+                alert("請完整填寫手動城市的四項欄位！");
+                return;
+            }
+
+            try {
+                new Intl.DateTimeFormat('en-US', { timeZone: tz }).format(new Date());
+            } catch (e) {
+                alert("無效的 IANA 時區代碼！例如: America/Chicago 或 Asia/Bangkok");
+                return;
+            }
+
+            customCities = customCities.filter(c => c.tz !== tz);
+            customCities.push({ name, tz, lat, lon });
+            saveCustomCities(customCities);
+            refreshCityDropdown();
+            renderCustomCityTable();
+
+            document.getElementById("manualCityForm").reset();
+            showCityStatus(`✅ 手動新增成功：${name}`, "text-success");
+        }
+
+        function selectAndApplyCity(tz) {
+            selectedTimezone = tz;
+            const dropdown = document.getElementById("tzSelect");
+            if (dropdown) dropdown.value = tz;
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('cityModal'));
+            if (modal) modal.hide();
+
+            changeTimezone();
+        }
+
+        function delCustomCity(idx) {
+            const t = i18n[currentLang];
+            if (confirm(t.confirmDelCity)) {
+                const deleted = customCities.splice(idx, 1)[0];
+                saveCustomCities(customCities);
+                refreshCityDropdown();
+                renderCustomCityTable();
+
+                if (selectedTimezone === deleted.tz) {
+                    selectedTimezone = "local";
+                    document.getElementById("tzSelect").value = "local";
+                    changeTimezone();
+                }
+            }
+        }
+
+        function clearAllCustomCities() {
+            const t = i18n[currentLang];
+            if (confirm(t.confirmClearAllCities)) {
+                customCities = [];
+                saveCustomCities(customCities);
+                refreshCityDropdown();
+                renderCustomCityTable();
+
+                selectedTimezone = "local";
+                document.getElementById("tzSelect").value = "local";
+                changeTimezone();
+            }
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const t = i18n[currentLang];
+
+            document.getElementById("modeClockBtn").classList.toggle("active", mode === 'clock');
+            document.getElementById("modeSwBtn").classList.toggle("active", mode === 'stopwatch');
+            document.getElementById("modeCdBtn").classList.toggle("active", mode === 'countdown');
+
+            document.getElementById("dateTitle").style.display = (mode === 'clock' && dateHide) ? "block" : "none";
+            document.getElementById("timezoneWrap").style.display = (mode === 'clock') ? "flex" : "none";
+
+            document.getElementById("clockControls").style.display = (mode === 'clock') ? "flex" : "none";
+            document.getElementById("stopwatchControls").style.display = (mode === 'stopwatch') ? "flex" : "none";
+            document.getElementById("countdownControls").style.display = (mode === 'countdown') ? "block" : "none";
+
+            const globeContainer = document.getElementById("globeContainer");
+            if (globeContainer) {
+                globeContainer.style.opacity = (mode === 'clock') ? "1" : "0.35";
+                globeContainer.style.transition = "opacity 0.4s ease";
+            }
+
+            if (mode === 'clock') {
+                document.getElementById("panelTitle").innerText = t.panelClockTitle;
+                clockUpdate();
+            } else if (mode === 'stopwatch') {
+                document.getElementById("panelTitle").innerText = t.panelSwTitle;
+                updateSwDisplay();
+            } else if (mode === 'countdown') {
+                document.getElementById("panelTitle").innerText = t.panelCdTitle;
+                updateCdDisplay();
+            }
+        }
+
+        // ------------------------------------------
+        // 1. 系統時鐘核心功能
+        // ------------------------------------------
+        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        var cdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+
+        var timeFormat = 12;
+        var clockInterval = null;
+        var dateHide = true;
+        var cdate = false;
+
+        function getTimeInTimezone() {
+            const now = new Date();
+            if (selectedTimezone === 'local') {
+                return {
+                    year: now.getFullYear(),
+                    month: now.getMonth(),
+                    day: now.getDate(),
+                    dayOfWeek: now.getDay(),
+                    hours: now.getHours(),
+                    minutes: now.getMinutes(),
+                    seconds: now.getSeconds()
+                };
+            }
+
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: selectedTimezone,
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                weekday: 'short',
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                hour12: false
+            });
+
+            const parts = formatter.formatToParts(now);
+            const p = {};
+            parts.forEach(pt => p[pt.type] = pt.value);
+            const weekdayMap = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
+
+            return {
+                year: parseInt(p.year),
+                month: parseInt(p.month) - 1,
+                day: parseInt(p.day),
+                dayOfWeek: weekdayMap[p.weekday] !== undefined ? weekdayMap[p.weekday] : now.getDay(),
+                hours: parseInt(p.hour) === 24 ? 0 : parseInt(p.hour),
+                minutes: parseInt(p.minute),
+                seconds: parseInt(p.second)
+            };
+        }
+
+        function clockUpdate() {
+            if (currentMode !== 'clock') return;
+            const tLang = i18n[currentLang];
+
+            const t = getTimeInTimezone();
+            const curHours = Number(t.hours);
+            const curMinutes = Number(t.minutes);
+            const curSeconds = Number(t.seconds);
+            const s = addZero(curSeconds);
+            const m = addZero(curMinutes);
+            const h = addZero(curHours);
+
+            const totalSecOfDay = curHours * 3600 + curMinutes * 60 + curSeconds;
+
+            let isAlarmActive = false;
+            let alarmRemark = "";
+
+            if (timerObject && timerObject.length > 0) {
+                for (let i = 0; i < timerObject.length; i++) {
+                    let isEnabled = (timerObject[i].enable === 'checked' || timerObject[i].enable === true || timerObject[i].enable === 'true');
+                    let itemHour = Number(timerObject[i].hour);
+                    let itemMin = Number(timerObject[i].minutes);
+                    let itemSec = Number(timerObject[i].seconds !== undefined ? timerObject[i].seconds : 0);
+
+                    if (itemHour === curHours && itemMin === curMinutes && itemSec === curSeconds && isEnabled) {
+                        isAlarmActive = true;
+                        alarmRemark = timerObject[i].remark || tLang.defaultAlarmRemark;
+                        break;
+                    }
+                }
+
+                let alarmIcon = document.getElementById("bsIcon");
+                if (alarmIcon) {
+                    if (isAlarmActive) {
+                        alarmIcon.style.setProperty("display", "block", "important");
+                        playBeep();
+
+                        if (lastTriggeredSecondStamp !== totalSecOfDay) {
+                            lastTriggeredSecondStamp = totalSecOfDay;
+                            showAlarmBanner(tLang.alarmTriggerTitle, alarmRemark, `${addZero(curHours)}:${addZero(curMinutes)}:${addZero(curSeconds)}`);
+                        }
+                    } else {
+                        if (lastTriggeredSecondStamp !== totalSecOfDay) {
+                            alarmIcon.style.display = "none";
+                        }
+                    }
+                }
+            }
+
+            let formatStr = '';
+            if (timeFormat == 12) {
+                let h12 = addZero((curHours > 12) ? curHours - 12 : (curHours === 0 ? 12 : curHours));
+                formatStr = h12 + ':' + m + ':' + s + ((curHours >= 12) ? " PM" : " AM");
+            } else {
+                formatStr = h + ':' + m + ':' + s;
+            }
+
+            document.getElementById("mainDisplay").innerText = formatStr;
+
+            const dayOfWeek = days[t.dayOfWeek];
+            const month = months[t.month];
+            let dateString = '';
+            if (cdate && currentLang === 'zh') {
+                dateString = '民國' + (t.year - 1911) + '年' + (t.month + 1) + '月' + t.day + '日，' + cdays[t.dayOfWeek];
+            } else {
+                dateString = dayOfWeek + ', ' + month + ' ' + t.day + ', ' + t.year;
+            }
+            document.getElementById("dateTitle").innerText = dateString;
+        }
+
+        document.getElementById("btnFormat").addEventListener("click", function () {
+            const t = i18n[currentLang];
+            if (timeFormat == 12) {
+                timeFormat = 24;
+                this.innerText = t.btn12H;
+            } else {
+                timeFormat = 12;
+                this.innerText = t.btn24H;
+            }
+            clockUpdate();
+        });
+
+        document.getElementById("btnClockStop").addEventListener("click", function () {
+            const t = i18n[currentLang];
+            if (clockInterval !== null) {
+                clearInterval(clockInterval);
+                clockInterval = null;
+                this.innerText = t.btnStart;
+            } else {
+                clockInterval = setInterval(clockUpdate, 1000);
+                this.innerText = t.btnStop;
+            }
+        });
+
+        document.getElementById("btnHideDate").addEventListener("click", function () {
+            const t = i18n[currentLang];
+            if (dateHide) {
+                dateHide = false;
+                this.innerText = t.btnShowDate;
+                document.getElementById("dateTitle").style.display = "none";
+            } else {
+                dateHide = true;
+                this.innerText = t.btnHideDate;
+                document.getElementById("dateTitle").style.display = "block";
+            }
+        });
+
+        document.getElementById("btnCdate").addEventListener("click", function () {
+            const t = i18n[currentLang];
+            if (cdate) {
+                cdate = false;
+                this.innerText = t.btnCdateROC;
+            } else {
+                cdate = true;
+                this.innerText = t.btnCdateAD;
+            }
+            clockUpdate();
+        });
+
+        // ------------------------------------------
+        // 2. 馬錶核心功能 (分:秒:1/10秒)
+        // ------------------------------------------
+        let swInterval = null;
+        let totalCentiseconds = 0;
+        let isSwRunning = false;
+        const swKey = "stopwatchCookie";
+        let memoryList = [];
+
+        function formatStopwatch(centis) {
+            let m = Math.floor(centis / 6000);
+            let s = Math.floor((centis % 6000) / 100);
+            let cs = centis % 100;
+            return `${addZero(m)}:${addZero(s)}:${addZero(cs)}`;
+        }
+
+        function updateSwDisplay() {
+            if (currentMode === 'stopwatch') {
+                document.getElementById("mainDisplay").innerText = formatStopwatch(totalCentiseconds);
+            }
+        }
+
+        const btnSwStart = document.getElementById("btnSwStart");
+        btnSwStart.addEventListener("click", function () {
+            const t = i18n[currentLang];
+            if (!isSwRunning) {
+                isSwRunning = true;
+                this.innerText = t.btnStop;
+                this.className = "btn btn-outline-danger";
+                swInterval = setInterval(() => {
+                    totalCentiseconds++;
+                    updateSwDisplay();
+                }, 10);
+            } else {
+                isSwRunning = false;
+                this.innerText = t.btnStart;
+                this.className = "btn btn-outline-primary";
+                clearInterval(swInterval);
+                swInterval = null;
+            }
+        });
+
+        document.getElementById("btnSwReset").addEventListener("click", function () {
+            const t = i18n[currentLang];
+            if (isSwRunning) {
+                clearInterval(swInterval);
+                swInterval = null;
+                isSwRunning = false;
+                btnSwStart.innerText = t.btnStart;
+                btnSwStart.className = "btn btn-outline-primary";
+            }
+            totalCentiseconds = 0;
+            updateSwDisplay();
+        });
+
+        const btnSwRecord = document.getElementById("btnSwRecord");
+        btnSwRecord.addEventListener("click", function () {
+            let currentStr = formatStopwatch(totalCentiseconds);
+            let newId = memoryList.length > 0 ? Math.max(...memoryList.map(p => p.id)) + 1 : 1;
+
+            memoryList.push({
+                id: newId,
+                time: currentStr,
+                centiseconds: totalCentiseconds
+            });
+
+            memoryList.sort((a, b) => a.id - b.id);
+            setCookie(swKey, memoryList, 30);
+            updateSwBadge();
+        });
+
+        function updateSwBadge() {
+            const t = i18n[currentLang];
+            btnSwRecord.innerText = `${t.swRecordBtnPrefix}(${memoryList.length})`;
+        }
+
+        const swModalEl = document.getElementById('swModal');
+        const swTbodyId = document.getElementById("swTbodyId");
+        const swEditForm = document.getElementById("swEditForm");
+        const editSwMinute = document.getElementById("editSwMinute");
+        const editSwSecond = document.getElementById("editSwSecond");
+        const editSwMs = document.getElementById("editSwMs");
+
+        function initSwSelects() {
+            editSwMinute.innerHTML = "";
+            editSwSecond.innerHTML = "";
+            editSwMs.innerHTML = "";
+            for (let i = 0; i <= 59; i++) {
+                editSwMinute.innerHTML += `<option value="${i}">${addZero(i)}</option>`;
+                editSwSecond.innerHTML += `<option value="${i}">${addZero(i)}</option>`;
+            }
+            for (let i = 0; i <= 99; i++) {
+                editSwMs.innerHTML += `<option value="${i}">${addZero(i)}</option>`;
+            }
+        }
+
+        swModalEl.addEventListener('show.bs.modal', function () {
+            memoryList = getCookie(swKey) || [];
+            updateSwBadge();
+            renderSwTable();
+            swEditForm.style.display = "none";
+        });
+
+        function renderSwTable() {
+            const t = i18n[currentLang];
+            swTbodyId.innerHTML = "";
+            if (memoryList.length === 0) {
+                swTbodyId.innerHTML = `<tr><td colspan="3" class="text-muted py-3">${t.swEmpty}</td></tr>`;
+                return;
+            }
+            memoryList.forEach((item, index) => {
+                let tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${item.id}</td>
+                    <td class="fw-bold">${item.time}</td>
+                    <td>
+                        <button type="button" class="btn btn-success btn-sm me-1" onclick="openSwEdit(${index})">${t.btnEdit}</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="delSwRecord(${index})">${t.btnDelete}</button>
+                    </td>
+                `;
+                swTbodyId.appendChild(tr);
+            });
+        }
+
+        window.openSwEdit = function (index) {
+            swEditForm.style.display = "flex";
+            document.getElementById("editSwIndex").value = index;
+            let [m, s, cs] = memoryList[index].time.split(":").map(Number);
+            editSwMinute.value = m;
+            editSwSecond.value = s;
+            editSwMs.value = cs;
+        };
+
+        document.getElementById("btnSaveSwEdit").addEventListener("click", function () {
+            let idx = parseInt(document.getElementById("editSwIndex").value);
+            let m = parseInt(editSwMinute.value);
+            let s = parseInt(editSwSecond.value);
+            let cs = parseInt(editSwMs.value);
+
+            memoryList[idx].time = `${addZero(m)}:${addZero(s)}:${addZero(cs)}`;
+            memoryList[idx].centiseconds = m * 6000 + s * 100 + cs;
+
+            setCookie(swKey, memoryList, 30);
+            renderSwTable();
+            swEditForm.style.display = "none";
+        });
+
+        window.cancelSwEdit = function () {
+            swEditForm.style.display = "none";
+        };
+
+        window.delSwRecord = function (index) {
+            const t = i18n[currentLang];
+            if (confirm(t.confirmDelSw)) {
+                memoryList.splice(index, 1);
+                memoryList.forEach((item, i) => item.id = i + 1);
+                setCookie(swKey, memoryList, 30);
+                renderSwTable();
+                updateSwBadge();
+            }
+        };
+
+        window.clearAllSwRecords = function () {
+            const t = i18n[currentLang];
+            if (confirm(t.confirmClearAllSw)) {
+                deleteCookie(swKey);
+                memoryList = [];
+                renderSwTable();
+                updateSwBadge();
+                swEditForm.style.display = "none";
+            }
+        };
+
+        // ------------------------------------------
+        // 3. 倒數計時器核心功能 (Countdown Timer)
+        // ------------------------------------------
+        let cdInterval = null;
+        let cdRemainingSeconds = 10;
+        let isCdRunning = false;
+
+        function formatCountdown(sec) {
+            let h = Math.floor(sec / 3600);
+            let m = Math.floor((sec % 3600) / 60);
+            let s = sec % 60;
+            return `${addZero(h)}:${addZero(m)}:${addZero(s)}`;
+        }
+
+        function updateCdDisplay() {
+            if (currentMode === 'countdown') {
+                document.getElementById("mainDisplay").innerText = formatCountdown(cdRemainingSeconds);
+            }
+        }
+
+        function setCountdownFromInputs() {
+            let h = parseInt(document.getElementById("cdHourInput").value) || 0;
+            let m = parseInt(document.getElementById("cdMinInput").value) || 0;
+            let s = parseInt(document.getElementById("cdSecInput").value) || 0;
+            cdRemainingSeconds = h * 3600 + m * 60 + s;
+            if (cdRemainingSeconds < 0) cdRemainingSeconds = 0;
+            updateCdDisplay();
+        }
+
+        function addCountdownSeconds(secondsToAdd) {
+            cdRemainingSeconds += secondsToAdd;
+            updateCdDisplay();
+        }
+
+        const btnCdStart = document.getElementById("btnCdStart");
+        btnCdStart.addEventListener("click", function () {
+            const t = i18n[currentLang];
+            if (!isCdRunning) {
+                if (cdRemainingSeconds <= 0) {
+                    setCountdownFromInputs();
+                    if (cdRemainingSeconds <= 0) return;
+                }
+                isCdRunning = true;
+                this.innerText = t.btnCdPause;
+                this.className = "btn btn-outline-danger";
+
+                cdInterval = setInterval(() => {
+                    if (cdRemainingSeconds > 0) {
+                        cdRemainingSeconds--;
+                        updateCdDisplay();
+
+                        if (cdRemainingSeconds === 0) {
+                            clearInterval(cdInterval);
+                            cdInterval = null;
+                            isCdRunning = false;
+                            btnCdStart.innerText = t.btnCdStart;
+                            btnCdStart.className = "btn btn-outline-primary";
+
+                            let alarmIcon = document.getElementById("bsIcon");
+                            alarmIcon.style.setProperty("display", "block", "important");
+                            playBeep();
+
+                            showAlarmBanner(t.cdEndTitle, t.cdEndRemark, "00:00:00");
+                            setTimeout(() => {
+                                alarmIcon.style.display = "none";
+                            }, 5000);
+                        }
+                    }
+                }, 1000);
+            } else {
+                isCdRunning = false;
+                this.innerText = t.btnCdStart;
+                this.className = "btn btn-outline-primary";
+                clearInterval(cdInterval);
+                cdInterval = null;
+            }
+        });
+
+        document.getElementById("btnCdReset").addEventListener("click", function () {
+            const t = i18n[currentLang];
+            if (isCdRunning) {
+                clearInterval(cdInterval);
+                cdInterval = null;
+                isCdRunning = false;
+                btnCdStart.innerText = t.btnCdStart;
+                btnCdStart.className = "btn btn-outline-primary";
+            }
+            setCountdownFromInputs();
+        });
+
+        // ------------------------------------------
+        // 4. 定時鬧鐘設定功能
+        // ------------------------------------------
+        var timerObject = [];
+        var timerUpdate = false;
+        var updateIndex = 0;
+        var alarmKey = "timerCookie";
+
+        function initAlarmSelects() {
+            var hourSelect = document.getElementById("hour");
+            var minutesSelect = document.getElementById("minutes");
+            var secondsSelect = document.getElementById("seconds");
+            const t = i18n[currentLang];
+
+            hourSelect.innerHTML = `<option selected value="">${t.labelCdHour}</option>`;
+            minutesSelect.innerHTML = `<option selected value="">${t.labelCdMin}</option>`;
+            secondsSelect.innerHTML = `<option selected value="">${t.labelCdSec}</option>`;
+
+            for (var h = 0; h <= 23; h++) {
+                hourSelect.innerHTML += '<option value="' + h + '">' + addZero(h) + ' ' + (currentLang === 'zh' ? '時' : 'h') + '</option>';
+            }
+            for (var m = 0; m <= 59; m++) {
+                minutesSelect.innerHTML += '<option value="' + m + '">' + addZero(m) + ' 分</option>';
+                secondsSelect.innerHTML += '<option value="' + m + '">' + addZero(m) + ' 秒</option>';
+            }
+        }
+
+        const alarmModal = document.getElementById('exampleModal');
+        alarmModal.addEventListener('shown.bs.modal', () => {
+            const t = i18n[currentLang];
+            timerUpdate = false;
+            document.getElementById("addBtn").innerHTML = t.btnAdd;
+            updateTimerForm();
+            document.forms["timerForm1"].reset();
+        });
+
+        function appendTimer() {
+            const t = i18n[currentLang];
+            let timerForm = document.forms["timerForm1"];
+            let remark = timerForm.elements.remark.value;
+            let hour = parseInt(timerForm.elements.hour.value);
+            let minutes = parseInt(timerForm.elements.minutes.value);
+            let seconds = parseInt(timerForm.elements.seconds.value);
+
+            if (remark == "" || isNaN(hour) || isNaN(minutes) || isNaN(seconds)) {
+                return false;
+            }
+
+            if (!timerUpdate) {
+                let id = timerObject.length === 0 ? 1 : Math.max(...timerObject.map(p => p.id)) + 1;
+                timerObject.push({ id, remark, hour, minutes, seconds, enable: 'checked' });
+            } else {
+                timerObject[updateIndex] = {
+                    id: timerObject[updateIndex].id,
+                    remark, hour, minutes, seconds,
+                    enable: timerObject[updateIndex].enable
+                };
+                timerUpdate = false;
+                document.getElementById("addBtn").innerHTML = t.btnAdd;
+            }
+
+            setCookie(alarmKey, timerObject, 30);
+            updateTimerForm();
+            timerForm.reset();
+        }
+
+        function updateTimerForm() {
+            const t = i18n[currentLang];
+            let tbody = document.getElementById("tbodyId");
+            tbody.innerHTML = "";
+            for (let i = 0; i < timerObject.length; i++) {
+                let tr = tbody.insertRow(tbody.rows.length);
+                tr.className = "align-middle";
+                tr.insertCell(0).innerHTML = timerObject[i].id;
+                tr.insertCell(1).innerHTML = timerObject[i].remark;
+                let secVal = timerObject[i].seconds !== undefined ? timerObject[i].seconds : 0;
+                tr.insertCell(2).innerHTML = `${addZero(timerObject[i].hour)}:${addZero(timerObject[i].minutes)}:${addZero(secVal)}`;
+                tr.insertCell(3).innerHTML = '<div class="form-check form-switch d-inline-block">' +
+                    '<input class="form-check-input" type="checkbox" role="switch" ' +
+                    timerObject[i].enable + ' style="float:none;" onchange="chgSwitch(' + i + ')">' +
+                    '<label class="form-check-label ms-1">' + t.alarmSwitchLabel + '</label></div>';
+                tr.insertCell(4).innerHTML = '<button type="button" class="btn btn-success btn-sm me-1" onclick="editTimer(' + i + ')">' + t.btnEdit + '</button>' +
+                    '<button type="button" class="btn btn-danger btn-sm" onclick="delTimer(' + i + ')">' + t.btnDelete + '</button>';
+            }
+        }
+
+        function editTimer(i) {
+            const t = i18n[currentLang];
+            let form = document.forms["timerForm1"];
+            form.elements.remark.value = timerObject[i].remark;
+            form.elements.hour.value = timerObject[i].hour;
+            form.elements.minutes.value = timerObject[i].minutes;
+            form.elements.seconds.value = timerObject[i].seconds !== undefined ? timerObject[i].seconds : 0;
+            updateIndex = i;
+            timerUpdate = true;
+            document.getElementById("addBtn").innerHTML = t.btnSave;
+        }
+
+        function delTimer(i) {
+            const t = i18n[currentLang];
+            if (confirm(t.confirmDelAlarm)) {
+                timerObject.splice(i, 1);
+                setCookie(alarmKey, timerObject, 30);
+                updateTimerForm();
+            }
+        }
+
+        function chgSwitch(i) {
+            timerObject[i].enable = (timerObject[i].enable === 'checked' || timerObject[i].enable === true) ? '' : 'checked';
+            setCookie(alarmKey, timerObject, 30);
+        }
+
+        function clearTimer() {
+            const t = i18n[currentLang];
+            if (confirm(t.confirmClearAllAlarms)) {
+                deleteCookie(alarmKey);
+                timerObject = [];
+                updateTimerForm();
+                document.forms["timerForm1"].reset();
+            }
+        }
+
+        // ------------------------------------------
+        // 5. 背景顏色、字體陰影與字體粗細切換
+        // ------------------------------------------
+        function chgBackground() {
+            var alpha = 0.38;
+            var c1 = "rgba(" + rand(20, 240) + "," + rand(20, 240) + "," + rand(20, 240) + "," + alpha + ")";
+            var c2 = "rgba(" + rand(20, 240) + "," + rand(20, 240) + "," + rand(20, 240) + "," + alpha + ")";
+            document.getElementById("clockArea").style.backgroundImage = "radial-gradient(" + c1 + "," + c2 + ")";
+        }
+
+        var textShadowStyles = [
+            { color: '#ffffff', shadow: '0 0 6px #ff0' },
+            { color: '#00ffff', shadow: '0 0 10px #00ffff, 0 0 20px #0077ff' },
+            { color: '#00ff88', shadow: '0 0 10px #00ff88, 0 0 20px #00aa44' },
+            { color: '#ff0077', shadow: '0 0 10px #ff0077, 0 0 25px #aa0044' },
+            { color: '#ffffff', shadow: '0 0 8px #ffffff' }
+        ];
+        var textStyleIndex = 0;
+
+        function chgTextShadow() {
+            textStyleIndex = (textStyleIndex + 1) % textShadowStyles.length;
+            var cur = textShadowStyles[textStyleIndex];
+            var clockEl = document.getElementById("mainDisplay");
+            clockEl.style.color = cur.color;
+            clockEl.style.textShadow = cur.shadow;
+        }
+
+        const fontWeights = [
+            { weight: '400' },
+            { weight: '700' },
+            { weight: '300' }
+        ];
+        let currentWeightIdx = 0;
+
+        function chgFontWeight() {
+            currentWeightIdx = (currentWeightIdx + 1) % fontWeights.length;
+            const current = fontWeights[currentWeightIdx];
+            document.getElementById("mainDisplay").style.fontWeight = current.weight;
+            updateFontWeightButtonText();
+        }
+
+        // ------------------------------------------
+        // 6. 動態星空與流星背景特效 (Canvas)
+        // ------------------------------------------
+        (function initMeteorBackground() {
+            const canvas = document.getElementById("meteorCanvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+
+            let width = (canvas.width = window.innerWidth);
+            let height = (canvas.height = window.innerHeight);
+
+            window.addEventListener("resize", () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const stars = [];
+            const starCount = 90;
+            for (let i = 0; i < starCount; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 1.5 + 0.4,
+                    alpha: Math.random() * 0.7 + 0.3
+                });
+            }
+
+            class Meteor {
+                constructor() {
+                    this.reset();
+                }
+
+                reset() {
+                    this.x = Math.random() * (width + 300) - 100;
+                    this.y = -50;
+                    this.len = Math.random() * 120 + 80;
+                    this.speed = Math.random() * 7 + 8;
+                    this.size = Math.random() * 1.8 + 1.2;
+                    this.dx = -this.speed;
+                    this.dy = this.speed;
+                    this.alpha = 1;
+                    this.fadeRate = Math.random() * 0.008 + 0.006;
+                }
+
+                update() {
+                    this.x += this.dx;
+                    this.y += this.dy;
+                    this.alpha -= this.fadeRate;
+
+                    if (this.y > height + 100 || this.x < -200 || this.alpha <= 0) {
+                        if (Math.random() < 0.035) {
+                            this.reset();
+                        }
+                    }
+                }
+
+                draw() {
+                    if (this.alpha <= 0) return;
+
+                    const tailX = this.x - this.dx * (this.len / this.speed);
+                    const tailYFixed = this.y - this.dy * (this.len / this.speed);
+
+                    const grad = ctx.createLinearGradient(this.x, this.y, tailX, tailYFixed);
+                    grad.addColorStop(0, `rgba(255, 255, 255, ${this.alpha})`);
+                    grad.addColorStop(0.3, `rgba(130, 210, 255, ${this.alpha * 0.7})`);
+                    grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
+
+                    ctx.save();
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = this.size;
+                    ctx.lineCap = "round";
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(tailX, tailYFixed);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            const meteors = Array.from({ length: 6 }, () => new Meteor());
+
+            function render() {
+                ctx.clearRect(0, 0, width, height);
+
+                for (let star of stars) {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                for (let m of meteors) {
+                    m.update();
+                    m.draw();
+                }
+
+                requestAnimationFrame(render);
+            }
+
+            render();
+        })();
+
+        // ------------------------------------------
+        // 7. Three.js 真實 3D 旋轉地球與無裁切柔和大氣光暈
+        // ------------------------------------------
+        function initThreeGlobe() {
+            const container = document.getElementById("globeContainer");
+            if (!container) return;
+
+            const width = 860;
+            const height = 860;
+
+            const scene = new THREE.Scene();
+            
+            const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.z = 3.6;
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            const earthGroup = new THREE.Group();
+            scene.add(earthGroup);
+
+            // 1. 3D 球體與材質
+            const geometry = new THREE.SphereGeometry(1, 64, 64);
+            const textureLoader = new THREE.TextureLoader();
+            
+            const texture = textureLoader.load(
+                'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg',
+                () => { renderer.render(scene, camera); }
+            );
+
+            const material = new THREE.MeshPhongMaterial({
+                map: texture,
+                shininess: 12,
+                specular: new THREE.Color(0x334455)
+            });
+            const earthMesh = new THREE.Mesh(geometry, material);
+            earthGroup.add(earthMesh);
+
+            // 2. 邊緣大氣層 Shader
+            const atmoGeo = new THREE.SphereGeometry(1.0, 64, 64);
+            const atmoMat = new THREE.ShaderMaterial({
+                vertexShader: `
+                    varying vec3 vNormal;
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    varying vec3 vNormal;
+                    void main() {
+                        float intensity = pow(0.72 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.2);
+                        intensity = smoothstep(0.0, 0.85, intensity);
+                        gl_FragColor = vec4(0.12, 0.65, 1.0, 1.0) * intensity * 1.5;
+                    }
+                `,
+                blending: THREE.AdditiveBlending,
+                side: THREE.BackSide,
+                transparent: true
+            });
+            const atmosphereMesh = new THREE.Mesh(atmoGeo, atmoMat);
+            atmosphereMesh.scale.set(1.05, 1.09, 1.09);
+            scene.add(atmosphereMesh);
+
+            // 3. 3D 光源
+            const ambientLight = new THREE.AmbientLight(0x446688, 1.2);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.6);
+            dirLight.position.set(-3, 2, 4);
+            scene.add(dirLight);
+
+            // 4. 城市亮點標記
+            const markerGroup = new THREE.Group();
+            earthGroup.add(markerGroup);
+
+            const markerGeo = new THREE.SphereGeometry(0.024, 16, 16);
+            const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+            const markerMesh = new THREE.Mesh(markerGeo, markerMat);
+            markerGroup.add(markerMesh);
+
+            const ringGeo = new THREE.RingGeometry(0.05, 0.025, 32);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.8
+            });
+            const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+            markerGroup.add(ringMesh);
+
+            function latLonToVector3(lat, lon, radius) {
+                const phi = (90 - lat) * (Math.PI / 180);
+                const theta = (lon + 180) * (Math.PI / 180);
+                return new THREE.Vector3(
+                    -radius * Math.sin(phi) * Math.cos(theta),
+                    radius * Math.cos(phi),
+                    radius * Math.sin(phi) * Math.sin(theta)
+                );
+            }
+
+            function setMarker(lat, lon) {
+                const pos = latLonToVector3(lat, lon, 1.01);
+                markerGroup.position.copy(pos);
+                markerGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pos.clone().normalize());
+            }
+
+            // 預設台北坐標
+            setMarker(25.03, 121.56);
+
+            let targetRotY = (121.56 - 90) * (Math.PI / 180);
+            let targetRotX = 25.03 * (Math.PI / 180) * 0.4;
+            earthGroup.rotation.y = -targetRotY;
+            earthGroup.rotation.x = targetRotX;
+
+            window.rotateEarthTo = function (lat, lon) {
+                targetRotY = (lon - 90) * (Math.PI / 180);
+                targetRotX = lat * (Math.PI / 180) * 0.45;
+                setMarker(lat, lon);
+            };
+
+            let ringScale = 1;
+            function animate() {
+                requestAnimationFrame(animate);
+
+                earthGroup.rotation.y += (-targetRotY - earthGroup.rotation.y) * 0.06;
+                earthGroup.rotation.x += (targetRotX - earthGroup.rotation.x) * 0.06;
+
+                ringScale += 0.025;
+                if (ringScale > 2.5) {
+                    ringScale = 1;
+                }
+                ringMesh.scale.set(ringScale, ringScale, ringScale);
+                ringMat.opacity = Math.max(0, 1 - (ringScale - 1) / 1.5);
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+
+        // ------------------------------------------
+        // 8. 初始化載入
+        // ------------------------------------------
+        window.onload = function () {
+            initAlarmSelects();
+            initSwSelects();
+
+            timerObject = getCookie(alarmKey) || [];
+            memoryList = getCookie(swKey) || [];
+            customCities = getCustomCities();
+
+            updateSwBadge();
+            applyUILanguage();
+            clockInterval = setInterval(clockUpdate, 1000);
+
+            initThreeGlobe();
+        };
+    </script>
+</body>
+
+</html>

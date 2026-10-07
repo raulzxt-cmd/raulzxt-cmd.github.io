@@ -530,7 +530,7 @@ html {
      object-fit: cover;
   display: block;
 }
-@media (max-width: 992px) {
+@media (max-width: 400px) {
   .work-section .project-preview-modal {
     display: none;
   }

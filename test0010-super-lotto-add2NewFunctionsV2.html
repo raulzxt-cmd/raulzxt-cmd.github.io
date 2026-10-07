@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="pageTitle">🏝️ 威力彩．熱帶小島大尋寶</title>
+    <!-- 引入 Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
+    <style type="text/css">
+        /* ===== 熱帶海島海浪漸層背景 ===== */
+        body {
+            background: radial-gradient(circle at 50% 10%, #17c3b2 0%, #0077b6 40%, #023e8a 85%, #03045e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
+            min-height: 100vh;
+            padding: 30px 15px;
+            color: #2b2d42;
+        }
+
+        /* ===== 藏寶圖主要羊皮紙容器 ===== */
+        .treasure-card {
+            background: #fffdf7;
+            border: 6px double #c7923e;
+            border-radius: 20px;
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45), inset 0 0 80px rgba(224, 169, 59, 0.15);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 標題旗幟 */
+        .treasure-header {
+            position: relative;
+            text-align: center;
+            background: linear-gradient(135deg, #8c531b 0%, #d4af37 50%, #8c531b 100%);
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+        }
+
+        .treasure-header h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+
+        .treasure-header p {
+            font-size: 0.95rem;
+            margin: 4px 0 0 0;
+            color: #fff4d1;
+        }
+
+        /* 語系切換按鈕 (同 clock-v7 質感) */
+        #btnLangToggle {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            color: #fff !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+            background-color: rgba(0, 0, 0, 0.25) !important;
+            backdrop-filter: blur(4px);
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            transition: all 0.2s ease;
+            z-index: 5;
+        }
+
+        #btnLangToggle:hover {
+            color: #030611 !important;
+            background-color: #ffd166 !important;
+            border-color: #ffd166 !important;
+            box-shadow: 0 0 10px rgba(255, 209, 102, 0.7);
+        }
+
+        /* 主表格邊框與背景 */
+        #myTable {
+            background-color: transparent;
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 0;
+        }
+
+        #myTable>thead>tr>th {
+            background: #2b4162;
+            color: #ffd166;
+            font-size: 1.1rem;
+            border: 1px solid #d4af37;
+            padding: 12px 16px;
+        }
+
+        #myTable>tbody>tr>td {
+            vertical-align: top;
+            border: 1px solid #e2c08d;
+            background-color: rgba(255, 253, 247, 0.9);
+            padding: 14px 16px;
+        }
+
+        /* 第一區：金幣號碼 (01~38) */
+        .zone-title-1 {
+            color: #b7791f;
+            font-size: 1.05rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .coin-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .coin-item {
+            position: relative;
+        }
+
+        .coin-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .coin-label {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #fff3b0 0%, #e0a93b 100%);
+            border: 2px solid #b7791f;
+            color: #533300;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+        }
+
+        .coin-label:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 金幣選中狀態：金光耀眼 */
+        .coin-item input[type="checkbox"]:checked+.coin-label {
+            background: linear-gradient(145deg, #ff9e00 0%, #e85d04 100%);
+            border-color: #fff3b0;
+            color: #ffffff;
+            transform: scale(1.1);
+            box-shadow: 0 0 14px #ff9e00, 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 第二區：傳奇紅寶石號碼 (01~08) */
+        .zone-title-2 {
+            color: #c9184a;
+            font-size: 1.05rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .gem-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .gem-item {
+            position: relative;
+        }
+
+        .gem-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .gem-label {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ffccd5 0%, #e63946 100%);
+            border: 2px solid #a4133c;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(255, 255, 255, 0.7);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+        }
+
+        .gem-label:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 紅寶石選中狀態：絢麗霓光 */
+        .gem-item input[type="radio"]:checked+.gem-label {
+            background: linear-gradient(145deg, #ff0054 0%, #7209b7 100%);
+            border-color: #ffd166;
+            transform: scale(1.12);
+            box-shadow: 0 0 16px #ff0054, 0 4px 10px rgba(0, 0, 0, 0.35);
+        }
+
+        /* 航海藏寶圖說明表格 */
+        .treasure-table {
+            width: 100%;
+            margin-top: 8px;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #d4af37;
+        }
+
+        .treasure-table th {
+            background-color: #3d5a80;
+            color: #fff;
+            padding: 6px 10px;
+            font-weight: 600;
+        }
+
+        .treasure-table td {
+            border: 1px solid #ebd7b2;
+            padding: 5px 10px;
+        }
+
+        .treasure-table tr:nth-child(even) {
+            background-color: #fbf5e8;
+        }
+
+        /* 尋寶按鈕群組 */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-pirate-emerald {
+            background: linear-gradient(135deg, #2a9d8f, #264653);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-pirate-emerald:hover {
+            background: linear-gradient(135deg, #21867a, #1d353f);
+            color: #fff;
+        }
+
+        .btn-pirate-amber {
+            background: linear-gradient(135deg, #f4a261, #e76f51);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-pirate-amber:hover {
+            background: linear-gradient(135deg, #e7904d, #d35a3b);
+            color: #fff;
+        }
+
+        .btn-pirate-blue {
+            background: linear-gradient(135deg, #0077b6, #023e8a);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-pirate-blue:hover {
+            background: linear-gradient(135deg, #006094, #012d64);
+            color: #fff;
+        }
+
+        .btn-pirate-red {
+            background: linear-gradient(135deg, #e63946, #b5179e);
+            color: #fff;
+            border: none;
+            font-weight: 700;
+            font-size: 1.05rem;
+            padding: 8px 18px;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.35);
+        }
+
+        .btn-pirate-red:hover {
+            background: linear-gradient(135deg, #cc2936, #9b1187);
+            color: #fff;
+        }
+
+        .btn-pirate-auto {
+            background: linear-gradient(135deg, #7209b7, #3a0ca3);
+            color: #ffd166;
+            border: none;
+            font-weight: 700;
+            padding: 8px 18px;
+            box-shadow: 0 4px 12px rgba(114, 9, 183, 0.35);
+        }
+
+        .btn-pirate-auto:hover {
+            background: linear-gradient(135deg, #5b0792, #290875);
+            color: #ffe49e;
+        }
+
+        /* 出土獎號與探勘成果區塊 */
+        .result-box {
+            background: #fbf5e8;
+            border: 2px dashed #b7791f;
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+
+        .ball-drawn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin: 2px 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .ball-drawn-z1 {
+            background: linear-gradient(145deg, #ffd166, #f77f00);
+            border: 1px solid #b7791f;
+            color: #fff;
+        }
+
+        .ball-drawn-z2 {
+            background: linear-gradient(145deg, #ff0054, #7209b7);
+            border: 1px solid #ffd166;
+            color: #fff;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 6px;
+        }
+
+        .status-win {
+            background: #d4af37;
+            color: #3b2500;
+            border: 1px solid #b7791f;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+        }
+
+        .status-lose {
+            background: #ced4da;
+            color: #495057;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" style="max-width: 1050px;">
+        <div class="treasure-card">
+            <!-- 頂部海島尋寶橫幅 -->
+            <div class="treasure-header">
+                <!-- 語系切換按鈕 -->
+                <button type="button" class="btn btn-sm fw-bold rounded-pill" id="btnLangToggle" onclick="toggleLanguage()">EN</button>
+                <h1 id="headerTitle">🏝️ 威力彩．熱帶小島大尋寶</h1>
+                <p id="headerSub">探索加勒比海的神祕寶藏：挖掘 6 顆黃金金幣與 1 顆璀璨紅寶石！</p>
+            </div>
+
+            <!-- 主表格操作區 -->
+            <table id="myTable" class="table align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 55%;" id="thExplorerZone">🗺️ 藏寶圖探勘區（選擇您的幸運號碼）</th>
+                        <th scope="col" style="width: 45%;" id="thRuleZone">📜 藏寶圖秘笈與寶藏清冊</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <!-- 左欄：號碼挑選 -->
+                        <td>
+                            <!-- 第一區 -->
+                            <div class="zone-title-1">
+                                <span id="lblZone1Title">💰【第一區：海島金幣】</span>
+                                <span class="text-muted fw-normal" style="font-size: 0.88rem;" id="lblZone1Sub">(任選 6 顆金幣：01 ~ 38)</span>
+                            </div>
+                            <div class="coin-grid" id="zone1Grid">
+                                <script>
+                                    for (let i = 1; i <= 38; i++) {
+                                        let numStr = i < 10 ? "0" + i : i;
+                                        document.write(`
+                                            <div class="coin-item">
+                                                <input type="checkbox" value="${i}" name="zone1[]" id="z1_${i}">
+                                                <label for="z1_${i}" class="coin-label">${numStr}</label>
+                                            </div>
+                                        `);
+                                    }
+                                </script>
+                            </div>
+
+                            <!-- 第二區 -->
+                            <div class="zone-title-2 mt-3">
+                                <span id="lblZone2Title">💎【第二區：傳奇紅寶石】</span>
+                                <span class="text-muted fw-normal" style="font-size: 0.88rem;" id="lblZone2Sub">(任選 1 顆寶石：01 ~ 08)</span>
+                            </div>
+                            <div class="gem-grid" id="zone2Grid">
+                                <script>
+                                    for (let i = 1; i <= 8; i++) {
+                                        let numStr = i < 10 ? "0" + i : i;
+                                        document.write(`
+                                            <div class="gem-item">
+                                                <input type="radio" value="${i}" name="zone2" id="z2_${i}">
+                                                <label for="z2_${i}" class="gem-label">${numStr}</label>
+                                            </div>
+                                        `);
+                                    }
+                                </script>
+                            </div>
+                        </td>
+
+                        <!-- 右欄：遊戲規則與獎金對照表 -->
+                        <td>
+                            <div class="fw-bold mb-1" style="color: #3d5a80;" id="ruleTitle">⚓ 航海規則說明</div>
+                            <p class="mb-2 text-secondary" style="font-size: 13.5px; line-height: 1.5;" id="ruleDesc">
+                                威力彩採雙區選號：於第一區 01~38 選擇 6 個金幣號碼，第二區 01~08 選擇 1 個紅寶石號碼。若與島嶼出土的寶藏全數吻合，即可帶走累積數億元之傳奇頭獎！
+                            </p>
+
+                            <table class="treasure-table text-center">
+                                <thead>
+                                    <tr>
+                                        <th id="thPrizeRank">獎項</th>
+                                        <th id="thPrizeCondition">中獎條件</th>
+                                        <th id="thPrizeReward">預估獎金</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong id="rankJackpot">👑 頭獎</strong></td>
+                                        <td id="condJackpot">第1區中6碼 ＋ 第2區中1碼</td>
+                                        <td id="rewJackpot">累積億元以上</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong id="rank2nd">🥈 貳獎</strong></td>
+                                        <td id="cond2nd">第1區中6碼 ＋ 第2區未中</td>
+                                        <td id="rew2nd">高額累積獎金</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong id="rank3rd">🥉 參獎</strong></td>
+                                        <td id="cond3rd">第1區中5碼 ＋ 第2區中1碼</td>
+                                        <td>$150,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong id="rank4th">肆獎</strong></td>
+                                        <td id="cond4th">第1區中5碼 ＋ 第2區未中</td>
+                                        <td>$20,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong id="rank5th">伍獎</strong></td>
+                                        <td id="cond5th">第1區中4碼 ＋ 第2區中1碼</td>
+                                        <td>$4,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong id="rank6th">陸獎</strong></td>
+                                        <td id="cond6th">第1區中4碼 ＋ 第2區未中</td>
+                                        <td>$800</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong id="rank7th">柒獎</strong></td>
+                                        <td id="cond7th">第1區中3碼 ＋ 第2區中1碼</td>
+                                        <td>$400</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong id="rank8th">捌獎</strong></td>
+                                        <td id="cond8th">第1區中2碼 ＋ 第2區中1碼</td>
+                                        <td>$200</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong id="rank9th">玖獎</strong></td>
+                                        <td id="cond9th">第1區中3碼 ＋ 第2區未中</td>
+                                        <td>$100</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong id="rankGeneral">普獎</strong></td>
+                                        <td id="condGeneral">第1區中1碼或0碼 ＋ 第2區中1碼</td>
+                                        <td>$100</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- 操作按鈕列 -->
+                    <tr>
+                        <td>
+                            <div class="action-buttons">
+                                <button type="button" class="btn btn-pirate-emerald" onclick="autoChoice()" id="btnAutoChoice">
+                                    🎲 海風選號 (全隨機)
+                                </button>
+                                <button type="button" class="btn btn-pirate-amber" onclick="autoChoiceKeepManual()" id="btnKeepManual">
+                                    🧭 鎖定航道 (保留手動補號)
+                                </button>
+                                <button type="button" class="btn btn-pirate-blue" onclick="reset()" id="btnReset">
+                                    🌊 浪湧沖刷 (清除所有選項重選)
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center h-100">
+                                <span class="text-muted" style="font-size: 13.5px;" id="lblTip">
+                                    💡 <strong>尋寶密技：</strong>先手動點選心儀的金幣或寶石，再點「保留手動補號」，精靈便會隨機為您補齊剩餘名額！
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- 開獎按鈕與號碼呈現 -->
+                    <tr>
+                        <td>
+                            <div class="action-buttons align-items-center">
+                                <button type="button" class="btn btn-pirate-red" onclick="openWinner()" id="btnOpenWinner">
+                                    🔑 挖掘寶藏 (單次開獎)
+                                </button>
+                                <button type="button" class="btn btn-pirate-auto" id="btnAutoOpen" onclick="autoOpenWinner()">
+                                    ⚡ 自動尋寶 (挖到柒獎以上即停)
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="result-box">
+                                <div class="fw-bold" style="color: #0077b6;" id="lblDrawnTitle">🌟 本期出土寶藏號碼：</div>
+                                <div id="winNumbers" class="mt-1">
+                                    <span class="text-muted" id="lblDrawnWait">（尚未開始挖寶，請選妥號碼後點擊開獎）</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- 開獎詳細探勘成果報告 -->
+                    <tr>
+                        <td colspan="2">
+                            <div class="result-box">
+                                <div class="fw-bold mb-1" style="color: #8c531b;" id="lblReportTitle">📋 尋寶探勘報告：</div>
+                                <div id="winStatus">
+                                    <span class="text-muted" id="lblReportWait">請完成選號並挖掘寶藏以查閱中獎結果。</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 引用函式庫 -->
+    <script type="text/javascript" src="./comlib.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script type="text/javascript">
+        /**
+         * 亂數相容備援函式
+         */
+        if (typeof rand !== 'function') {
+            function rand(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+        }
+
+        // ==========================================
+        // 多語系字典與控制機制 (比照 clock-v7 架構)
+        // ==========================================
+        let currentLang = 'zh';
+        let lastReportData = null; // 暫存最近一次開獎結果，語系切換時即時重繪報告
+
+        const i18n = {
+            zh: {
+                langBtn: "EN",
+                pageTitle: "🏝️ 威力彩．熱帶小島大尋寶",
+                headerTitle: "🏝️ 威力彩．熱帶小島大尋寶",
+                headerSub: "探索加勒比海的神祕寶藏：挖掘 6 顆黃金金幣與 1 顆璀璨紅寶石！",
+                thExplorerZone: "🗺️ 藏寶圖探勘區（選擇您的幸運號碼）",
+                thRuleZone: "📜 藏寶圖秘笈與寶藏清冊",
+                lblZone1Title: "💰【第一區：海島金幣】",
+                lblZone1Sub: "(任選 6 顆金幣：01 ~ 38)",
+                lblZone2Title: "💎【第二區：傳奇紅寶石】",
+                lblZone2Sub: "(任選 1 顆寶石：01 ~ 08)",
+                ruleTitle: "⚓ 航海規則說明",
+                ruleDesc: "威力彩採雙區選號：於第一區 01~38 選擇 6 個金幣號碼，第二區 01~08 選擇 1 個紅寶石號碼。若與島嶼出土的寶藏全數吻合，即可帶走累積數億元之傳奇頭獎！",
+                thPrizeRank: "獎項",
+                thPrizeCondition: "中獎條件",
+                thPrizeReward: "預估獎金",
+                rankJackpot: "👑 頭獎",
+                condJackpot: "第1區中6碼 ＋ 第2區中1碼",
+                rewJackpot: "累積億元以上",
+                rank2nd: "🥈 貳獎",
+                cond2nd: "第1區中6碼 ＋ 第2區未中",
+                rew2nd: "高額累積獎金",
+                rank3rd: "🥉 參獎",
+                cond3rd: "第1區中5碼 ＋ 第2區中1碼",
+                rank4th: "肆獎",
+                cond4th: "第1區中5碼 ＋ 第2區未中",
+                rank5th: "伍獎",
+                cond5th: "第1區中4碼 ＋ 第2區中1碼",
+                rank6th: "陸獎",
+                cond6th: "第1區中4碼 ＋ 第2區未中",
+                rank7th: "柒獎",
+                cond7th: "第1區中3碼 ＋ 第2區中1碼",
+                rank8th: "捌獎",
+                cond8th: "第1區中2碼 ＋ 第2區中1碼",
+                rank9th: "玖獎",
+                cond9th: "第1區中3碼 ＋ 第2區未中",
+                rankGeneral: "普獎",
+                condGeneral: "第1區中1碼或0碼 ＋ 第2區中1碼",
+                btnAutoChoice: "🎲 海風選號 (全隨機)",
+                btnKeepManual: "🧭 鎖定航道 (保留手動補號)",
+                btnReset: "🌊 浪湧沖刷 (清除所有選項重選)",
+                lblTip: "💡 <strong>尋寶密技：</strong>先手動點選心儀的金幣或寶石，再點「保留手動補號」，精靈便會隨機為您補齊剩餘名額！",
+                btnOpenWinner: "🔑 挖掘寶藏 (單次開獎)",
+                btnAutoOpenStart: "⚡ 自動尋寶 (挖到柒獎以上即停)",
+                btnAutoOpenStop: "🛑 停止自動尋寶",
+                lblDrawnTitle: "🌟 本期出土寶藏號碼：",
+                lblDrawnWait: "（尚未開始挖寶，請選妥號碼後點擊開獎）",
+                lblReportTitle: "📋 尋寶探勘報告：",
+                lblReportWait: "請完成選號並挖掘寶藏以查閱中獎結果。",
+                // 執行階段提示
+                alertZ1Over: "第一區目前已選了 {count} 個金幣，超過 6 個囉！請先取消多餘的號碼。",
+                alertAlreadyFull: "第一區 (6碼) 與第二區 (1碼) 皆已選妥，無需再補號！",
+                alertZ1Required: "威力彩第一區必須剛好選擇 6 個金幣號碼！目前已選：{count} 個",
+                alertZ2Required: "威力彩第二區必須挑選 1 顆傳奇紅寶石號碼！",
+                alertAutoOpenCheck: "探險前請先選妥第一區 6 個金幣與第二區 1 顆紅寶石！",
+                // 開獎球次序
+                tagDrawOrder: "【出土順序】",
+                tagSortedOrder: "【整理排序】",
+                // 成果報告標籤
+                repBet: "🪙 <strong>您的下注：</strong>第一區金幣 [ {z1} ] ＋ 第二區紅寶石 [ 0{z2} ]",
+                repHitZ1: "🎯 <strong>第一區命中 ({count} 顆)：</strong>{balls}",
+                repHitZ2: "💎 <strong>第二區命中：</strong>{status}",
+                repZ2HitSuccess: '<span class="text-danger fw-bold">命中紅寶石 (0{num})！</span>',
+                repMissed: '<span class="text-muted">未命中</span>',
+                repStatusTitle: "🏆 <strong>中獎狀態：</strong>",
+                repStreak: "已連續探險第 {count} 次",
+                // 獎項名稱
+                prizeT1: "👑 頭獎：億萬傳奇海盜寶藏！",
+                prizeT2: "🥈 貳獎：巨額海島金庫！",
+                prizeT3: "🥉 參獎：$150,000",
+                prizeT4: "肆獎：$20,000",
+                prizeT5: "伍獎：$4,000",
+                prizeT6: "陸獎：$800",
+                prizeT7: "柒獎：$400",
+                prizeT8: "捌獎：$200",
+                prizeT9: "玖獎：$100",
+                prizeT10: "普獎：$100",
+                prizeNone: "尚未挖到寶藏，再接再厲！"
+            },
+            en: {
+                langBtn: "繁中",
+                pageTitle: "🏝️ Super Lotto: Tropical Island Treasure Hunt",
+                headerTitle: "🏝️ Super Lotto: Tropical Treasure Hunt",
+                headerSub: "Explore the Caribbean Mystery: Dig 6 Gold Coins & 1 Radiant Ruby!",
+                thExplorerZone: "🗺️ Island Expedition Zone (Pick Lucky Numbers)",
+                thRuleZone: "📜 Treasure Codex & Prize Table",
+                lblZone1Title: "💰 [Zone 1: Golden Coins]",
+                lblZone1Sub: "(Pick 6 Coins: 01 ~ 38)",
+                lblZone2Title: "💎 [Zone 2: Radiant Ruby]",
+                lblZone2Sub: "(Pick 1 Ruby: 01 ~ 08)",
+                ruleTitle: "⚓ Expedition Rules",
+                ruleDesc: "Super Lotto uses dual zones: Pick 6 gold numbers from 01-38, and 1 ruby number from 01-08. Match all numbers excavated from the island to claim the multi-billion jackpot!",
+                thPrizeRank: "Prize",
+                thPrizeCondition: "Winning Criteria",
+                thPrizeReward: "Est. Payout",
+                rankJackpot: "👑 Grand Jackpot",
+                condJackpot: "Zone 1 (6) + Zone 2 (1)",
+                rewJackpot: "NT$ 100M+ Roll",
+                rank2nd: "🥈 2nd Prize",
+                cond2nd: "Zone 1 (6) + Zone 2 (0)",
+                rew2nd: "High Rollover",
+                rank3rd: "🥉 3rd Prize",
+                cond3rd: "Zone 1 (5) + Zone 2 (1)",
+                rank4th: "4th Prize",
+                cond4th: "Zone 1 (5) + Zone 2 (0)",
+                rank5th: "5th Prize",
+                cond5th: "Zone 1 (4) + Zone 2 (1)",
+                rank6th: "6th Prize",
+                cond6th: "Zone 1 (4) + Zone 2 (0)",
+                rank7th: "7th Prize",
+                cond7th: "Zone 1 (3) + Zone 2 (1)",
+                rank8th: "8th Prize",
+                cond8th: "Zone 1 (2) + Zone 2 (1)",
+                rank9th: "9th Prize",
+                cond9th: "Zone 1 (3) + Zone 2 (0)",
+                rankGeneral: "General",
+                condGeneral: "Zone 1 (0~1) + Zone 2 (1)",
+                btnAutoChoice: "🎲 Sea Breeze (Full Quick Pick)",
+                btnKeepManual: "🧭 Lock Course (Auto-Fill Rest)",
+                btnReset: "🌊 Tidal Wave (Clear All)",
+                lblTip: "💡 <strong>Pirate Tip:</strong> Select your favorite numbers manually first, then tap 'Auto-Fill Rest' to complete your ticket randomly!",
+                btnOpenWinner: "🔑 Unearth Treasure (Single Draw)",
+                btnAutoOpenStart: "⚡ Auto Hunt (Stop at 7th Prize+)",
+                btnAutoOpenStop: "🛑 Stop Auto Hunt",
+                lblDrawnTitle: "🌟 Excavated Winning Numbers:",
+                lblDrawnWait: "(Expedition has not started. Pick numbers and tap Draw)",
+                lblReportTitle: "📋 Expedition Result Report:",
+                lblReportWait: "Complete your selection and unearth treasure to inspect results.",
+                // 執行階段提示
+                alertZ1Over: "Zone 1 has {count} coins picked, exceeding the limit of 6! Please deselect extra coins.",
+                alertAlreadyFull: "Zone 1 (6 coins) & Zone 2 (1 ruby) are already selected!",
+                alertZ1Required: "Super Lotto Zone 1 requires exactly 6 coin numbers! Currently selected: {count}",
+                alertZ2Required: "Super Lotto Zone 2 requires exactly 1 radiant ruby number!",
+                alertAutoOpenCheck: "Please select 6 coins in Zone 1 and 1 ruby in Zone 2 before starting!",
+                // 開獎球次序
+                tagDrawOrder: "[Draw Order]",
+                tagSortedOrder: "[Sorted Order]",
+                // 成果報告標籤
+                repBet: "🪙 <strong>Your Ticket:</strong> Zone 1 [ {z1} ] + Zone 2 Ruby [ 0{z2} ]",
+                repHitZ1: "🎯 <strong>Zone 1 Hits ({count}):</strong> {balls}",
+                repHitZ2: "💎 <strong>Zone 2 Hit:</strong> {status}",
+                repZ2HitSuccess: '<span class="text-danger fw-bold">Ruby Hit (0{num})!</span>',
+                repMissed: '<span class="text-muted">Missed</span>',
+                repStatusTitle: "🏆 <strong>Winning Status:</strong>",
+                repStreak: "Expedition #{count}",
+                // 獎項名稱
+                prizeT1: "👑 Jackpot: Legendary Billion Pirate Treasure!",
+                prizeT2: "🥈 2nd Prize: Massive Island Vault!",
+                prizeT3: "🥉 3rd Prize: $150,000",
+                prizeT4: "4th Prize: $20,000",
+                prizeT5: "5th Prize: $4,000",
+                prizeT6: "6th Prize: $800",
+                prizeT7: "7th Prize: $400",
+                prizeT8: "8th Prize: $200",
+                prizeT9: "9th Prize: $100",
+                prizeT10: "General: $100",
+                prizeNone: "No treasure discovered this time. Keep sailing!"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            applyUILanguage();
+        }
+
+        function applyUILanguage() {
+            const t = i18n[currentLang];
+
+            // 網頁標題與頂部
+            document.title = t.pageTitle;
+            document.getElementById("btnLangToggle").innerText = t.langBtn;
+            document.getElementById("headerTitle").innerText = t.headerTitle;
+            document.getElementById("headerSub").innerText = t.headerSub;
+
+            // 表格表頭與分區標籤
+            document.getElementById("thExplorerZone").innerText = t.thExplorerZone;
+            document.getElementById("thRuleZone").innerText = t.thRuleZone;
+            document.getElementById("lblZone1Title").innerText = t.lblZone1Title;
+            document.getElementById("lblZone1Sub").innerText = t.lblZone1Sub;
+            document.getElementById("lblZone2Title").innerText = t.lblZone2Title;
+            document.getElementById("lblZone2Sub").innerText = t.lblZone2Sub;
+
+            // 規則說明與表格
+            document.getElementById("ruleTitle").innerText = t.ruleTitle;
+            document.getElementById("ruleDesc").innerText = t.ruleDesc;
+            document.getElementById("thPrizeRank").innerText = t.thPrizeRank;
+            document.getElementById("thPrizeCondition").innerText = t.thPrizeCondition;
+            document.getElementById("thPrizeReward").innerText = t.thPrizeReward;
+
+            document.getElementById("rankJackpot").innerText = t.rankJackpot;
+            document.getElementById("condJackpot").innerText = t.condJackpot;
+            document.getElementById("rewJackpot").innerText = t.rewJackpot;
+
+            document.getElementById("rank2nd").innerText = t.rank2nd;
+            document.getElementById("cond2nd").innerText = t.cond2nd;
+            document.getElementById("rew2nd").innerText = t.rew2nd;
+
+            document.getElementById("rank3rd").innerText = t.rank3rd;
+            document.getElementById("cond3rd").innerText = t.cond3rd;
+
+            document.getElementById("rank4th").innerText = t.rank4th;
+            document.getElementById("cond4th").innerText = t.cond4th;
+
+            document.getElementById("rank5th").innerText = t.rank5th;
+            document.getElementById("cond5th").innerText = t.cond5th;
+
+            document.getElementById("rank6th").innerText = t.rank6th;
+            document.getElementById("cond6th").innerText = t.cond6th;
+
+            document.getElementById("rank7th").innerText = t.rank7th;
+            document.getElementById("cond7th").innerText = t.cond7th;
+
+            document.getElementById("rank8th").innerText = t.rank8th;
+            document.getElementById("cond8th").innerText = t.cond8th;
+
+            document.getElementById("rank9th").innerText = t.rank9th;
+            document.getElementById("cond9th").innerText = t.cond9th;
+
+            document.getElementById("rankGeneral").innerText = t.rankGeneral;
+            document.getElementById("condGeneral").innerText = t.condGeneral;
+
+            // 操作按鈕與提示
+            document.getElementById("btnAutoChoice").innerText = t.btnAutoChoice;
+            document.getElementById("btnKeepManual").innerText = t.btnKeepManual;
+            document.getElementById("btnReset").innerText = t.btnReset;
+            document.getElementById("lblTip").innerHTML = t.lblTip;
+
+            document.getElementById("btnOpenWinner").innerText = t.btnOpenWinner;
+            document.getElementById("lblDrawnTitle").innerText = t.lblDrawnTitle;
+            document.getElementById("lblReportTitle").innerText = t.lblReportTitle;
+
+            // 自動尋寶按鈕文字狀態
+            let btnAuto = document.getElementById("btnAutoOpen");
+            if (btnAuto) {
+                btnAuto.innerText = (autoTimer !== null) ? t.btnAutoOpenStop : t.btnAutoOpenStart;
+            }
+
+            // 若尚無開獎記錄，更新等待文字
+            if (!lastReportData) {
+                let waitDrawn = document.getElementById("lblDrawnWait");
+                if (waitDrawn) waitDrawn.innerText = t.lblDrawnWait;
+                let waitReport = document.getElementById("lblReportWait");
+                if (waitReport) waitReport.innerText = t.lblReportWait;
+            } else {
+                // 已有開獎資料，立刻依照新語系重繪介面
+                renderDrawNumbers(lastReportData.drawZ1, lastReportData.sortedDrawZ1, lastReportData.drawZ2);
+                renderReportUI(lastReportData);
+            }
+        }
+
+        // ==========================================
+        // 核心邏輯
+        // ==========================================
+        var z1_arr = document.getElementsByName("zone1[]");
+        var z2_arr = document.getElementsByName("zone2");
+
+        var autoTimer = null;
+        var autoCount = 0;
+
+        function reset() {
+            stopAutoOpen();
+            for (let i = 0; i < z1_arr.length; i++) {
+                z1_arr[i].checked = false;
+            }
+            for (let i = 0; i < z2_arr.length; i++) {
+                z2_arr[i].checked = false;
+            }
+        }
+
+        function autoChoice() {
+            reset();
+            let selectedZ1Count = 0;
+            while (selectedZ1Count < 6) {
+                let idx = rand(0, 37);
+                if (!z1_arr[idx].checked) {
+                    z1_arr[idx].checked = true;
+                    selectedZ1Count++;
+                }
+            }
+            let idx2 = rand(0, 7);
+            z2_arr[idx2].checked = true;
+        }
+
+        function autoChoiceKeepManual() {
+            const t = i18n[currentLang];
+            let checkedZ1 = [];
+            for (let i = 0; i < z1_arr.length; i++) {
+                if (z1_arr[i].checked) checkedZ1.push(i);
+            }
+
+            if (checkedZ1.length > 6) {
+                alert(t.alertZ1Over.replace("{count}", checkedZ1.length));
+                return;
+            }
+
+            let hasZ2 = false;
+            for (let i = 0; i < z2_arr.length; i++) {
+                if (z2_arr[i].checked) {
+                    hasZ2 = true;
+                    break;
+                }
+            }
+
+            if (checkedZ1.length === 6 && hasZ2) {
+                alert(t.alertAlreadyFull);
+                return;
+            }
+
+            let needZ1 = 6 - checkedZ1.length;
+            let addedZ1 = 0;
+            while (addedZ1 < needZ1) {
+                let idx = rand(0, 37);
+                if (!z1_arr[idx].checked) {
+                    z1_arr[idx].checked = true;
+                    addedZ1++;
+                }
+            }
+
+            if (!hasZ2) {
+                let idx2 = rand(0, 7);
+                z2_arr[idx2].checked = true;
+            }
+        }
+
+        function renderDrawNumbers(drawZ1, sortedDrawZ1, drawZ2) {
+            const t = i18n[currentLang];
+            let drawBallsHtml = `<div class="d-flex flex-wrap align-items-center gap-1 mb-1">
+                <span class="me-1 fw-bold">${t.tagDrawOrder}</span>
+                ${drawZ1.map(n => `<span class="ball-drawn ball-drawn-z1">${n < 10 ? '0' + n : n}</span>`).join('')}
+                <span class="mx-1">＋</span>
+                <span class="ball-drawn ball-drawn-z2">${drawZ2 < 10 ? '0' + drawZ2 : drawZ2}</span>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-1">
+                <span class="me-1 fw-bold">${t.tagSortedOrder}</span>
+                ${sortedDrawZ1.map(n => `<span class="ball-drawn ball-drawn-z1">${n < 10 ? '0' + n : n}</span>`).join('')}
+                <span class="mx-1">＋</span>
+                <span class="ball-drawn ball-drawn-z2">${drawZ2 < 10 ? '0' + drawZ2 : drawZ2}</span>
+            </div>`;
+            document.getElementById("winNumbers").innerHTML = drawBallsHtml;
+        }
+
+        function renderReportUI(data) {
+            const t = i18n[currentLang];
+            let bonusInfo = getSuperLottoBonus(data.matchZ1.length, data.matchZ2);
+
+            let isWinning = bonusInfo.prizeMoney > 0;
+            let statusBadgeClass = isWinning ? "status-win" : "status-lose";
+
+            let betText = t.repBet
+                .replace("{z1}", data.sortedSelectZ1.map(n => n < 10 ? '0' + n : n).join(', '))
+                .replace("{z2}", data.selectZ2);
+
+            let z1BallsText = data.matchZ1.length > 0 
+                ? data.matchZ1.map(n => n < 10 ? '0' + n : n).join(', ') 
+                : t.repMissed;
+
+            let hitZ1Text = t.repHitZ1
+                .replace("{count}", data.matchZ1.length)
+                .replace("{balls}", z1BallsText);
+
+            let hitZ2Text = t.repHitZ2.replace(
+                "{status}", 
+                data.matchZ2 ? t.repZ2HitSuccess.replace("{num}", data.drawZ2) : t.repMissed
+            );
+
+            let streakBadge = data.autoCount > 0 
+                ? `<span class="badge bg-secondary ms-2">${t.repStreak.replace("{count}", data.autoCount)}</span>` 
+                : '';
+
+            let reportHtml = `
+                <div style="font-size: 14.5px; line-height: 1.8;">
+                    <div>${betText}</div>
+                    <div>${hitZ1Text}</div>
+                    <div>${hitZ2Text}</div>
+                    <div class="mt-1">
+                        ${t.repStatusTitle}
+                        <span class="status-badge ${statusBadgeClass}">
+                            ${bonusInfo.title}
+                        </span>
+                        ${streakBadge}
+                    </div>
+                </div>
+            `;
+            document.getElementById("winStatus").innerHTML = reportHtml;
+        }
+
+        function openWinner() {
+            const t = i18n[currentLang];
+
+            let selectZ1 = [];
+            let selectZ2 = null;
+
+            for (let i = 0; i < z1_arr.length; i++) {
+                if (z1_arr[i].checked) selectZ1.push(i + 1);
+            }
+            for (let i = 0; i < z2_arr.length; i++) {
+                if (z2_arr[i].checked) selectZ2 = i + 1;
+            }
+
+            if (selectZ1.length !== 6) {
+                alert(t.alertZ1Required.replace("{count}", selectZ1.length));
+                stopAutoOpen();
+                return null;
+            }
+
+            if (selectZ2 === null) {
+                alert(t.alertZ2Required);
+                stopAutoOpen();
+                return null;
+            }
+
+            let drawZ1 = [];
+            while (drawZ1.length < 6) {
+                let b = rand(1, 38);
+                if (drawZ1.indexOf(b) === -1) {
+                    drawZ1.push(b);
+                }
+            }
+
+            let drawZ2 = rand(1, 8);
+            let sortedDrawZ1 = [...drawZ1].sort((a, b) => a - b);
+            let sortedSelectZ1 = [...selectZ1].sort((a, b) => a - b);
+
+            let matchZ1 = [];
+            for (let i = 0; i < selectZ1.length; i++) {
+                if (drawZ1.indexOf(selectZ1[i]) !== -1) {
+                    matchZ1.push(selectZ1[i]);
+                }
+            }
+            matchZ1.sort((a, b) => a - b);
+
+            let matchZ2 = (selectZ2 === drawZ2);
+
+            // 儲存狀態快照
+            lastReportData = {
+                drawZ1,
+                sortedDrawZ1,
+                drawZ2,
+                sortedSelectZ1,
+                selectZ2,
+                matchZ1,
+                matchZ2,
+                autoCount
+            };
+
+            renderDrawNumbers(drawZ1, sortedDrawZ1, drawZ2);
+            renderReportUI(lastReportData);
+
+            return getSuperLottoBonus(matchZ1.length, matchZ2);
+        }
+
+        function autoOpenWinner() {
+            const t = i18n[currentLang];
+            if (autoTimer !== null) {
+                stopAutoOpen();
+                return;
+            }
+
+            let checkedCountZ1 = 0;
+            for (let i = 0; i < z1_arr.length; i++) {
+                if (z1_arr[i].checked) checkedCountZ1++;
+            }
+
+            let hasZ2 = false;
+            for (let i = 0; i < z2_arr.length; i++) {
+                if (z2_arr[i].checked) {
+                    hasZ2 = true;
+                    break;
+                }
+            }
+
+            if (checkedCountZ1 !== 6 || !hasZ2) {
+                alert(t.alertAutoOpenCheck);
+                return;
+            }
+
+            let btn = document.getElementById("btnAutoOpen");
+            btn.innerText = t.btnAutoOpenStop;
+            btn.classList.replace("btn-pirate-auto", "btn-warning");
+            autoCount = 0;
+
+            autoCount++;
+            let firstResult = openWinner();
+            if (firstResult && firstResult.prizeMoney >= 400) {
+                stopAutoOpen();
+                return;
+            }
+
+            autoTimer = setInterval(() => {
+                autoCount++;
+                let result = openWinner();
+                if (!result || result.prizeMoney >= 400) {
+                    stopAutoOpen();
+                }
+            }, 500);
+        }
+
+        function stopAutoOpen() {
+            const t = i18n[currentLang];
+            if (autoTimer !== null) {
+                clearInterval(autoTimer);
+                autoTimer = null;
+                let btn = document.getElementById("btnAutoOpen");
+                if (btn) {
+                    btn.innerText = t.btnAutoOpenStart;
+                    btn.classList.replace("btn-warning", "btn-pirate-auto");
+                }
+            }
+        }
+
+        function getSuperLottoBonus(matchedCount, hasZ2) {
+            const t = i18n[currentLang];
+
+            if (matchedCount === 6 && hasZ2) {
+                return { title: t.prizeT1, prizeMoney: 200000000, tier: 1 };
+            }
+            if (matchedCount === 6 && !hasZ2) {
+                return { title: t.prizeT2, prizeMoney: 10000000, tier: 2 };
+            }
+            if (matchedCount === 5 && hasZ2) {
+                return { title: t.prizeT3, prizeMoney: 150000, tier: 3 };
+            }
+            if (matchedCount === 5 && !hasZ2) {
+                return { title: t.prizeT4, prizeMoney: 20000, tier: 4 };
+            }
+            if (matchedCount === 4 && hasZ2) {
+                return { title: t.prizeT5, prizeMoney: 4000, tier: 5 };
+            }
+            if (matchedCount === 4 && !hasZ2) {
+                return { title: t.prizeT6, prizeMoney: 800, tier: 6 };
+            }
+            if (matchedCount === 3 && hasZ2) {
+                return { title: t.prizeT7, prizeMoney: 400, tier: 7 };
+            }
+            if (matchedCount === 2 && hasZ2) {
+                return { title: t.prizeT8, prizeMoney: 200, tier: 8 };
+            }
+            if (matchedCount === 3 && !hasZ2) {
+                return { title: t.prizeT9, prizeMoney: 100, tier: 9 };
+            }
+            if ((matchedCount === 1 || matchedCount === 0) && hasZ2) {
+                return { title: t.prizeT10, prizeMoney: 100, tier: 10 };
+            }
+            return { title: t.prizeNone, prizeMoney: 0, tier: 0 };
+        }
+
+        // 初始化套用語系
+        window.addEventListener("DOMContentLoaded", () => {
+            applyUILanguage();
+        });
+    </script>
+</body>
+
+</html>
