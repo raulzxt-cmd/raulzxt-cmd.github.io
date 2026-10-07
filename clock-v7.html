@@ -46,14 +46,14 @@
             pointer-events: none;
         }
 
-        /* 3D WebGL 地球容器：860px 充裕空間，光暈柔和不切邊 */
+        /* 3D WebGL 地球容器：RWD 自適應縮放 (最大860px，隨螢幕等比縮放) */
         #globeContainer {
             position: fixed;
             top: 48%;
             left: 50%;
             transform: translate(-50%, -55%);
-            width: 860px;
-            height: 860px;
+            width: min(85vmin, 860px);
+            height: min(85vmin, 860px);
             z-index: -1;
             pointer-events: none;
         }
@@ -61,6 +61,7 @@
         #globeContainer canvas {
             width: 100% !important;
             height: 100% !important;
+            display: block;
         }
 
         /* 主卡片毛玻璃質感 */
@@ -82,7 +83,7 @@
 
         .clockArea {
             width: 100%;
-            height: 420px;
+            min-height: 420px;
             background-image: radial-gradient(rgba(0, 0, 0, 0.2), rgba(20, 25, 40, 0.35));
             display: flex;
             flex-direction: column;
@@ -91,7 +92,76 @@
             border-top-left-radius: 6px;
             border-top-right-radius: 6px;
             position: relative;
+            padding: 70px 15px 30px 15px; /* 上方預留足夠空間給控制列折行 */
             transition: background 0.3s ease;
+        }
+
+        /* ===== 頂部整合控制列 (解決重疊問題的核心) ===== */
+        .top-controls-container {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* 空間不夠時自動換行 */
+            gap: 8px;
+        }
+
+        .timezone-box {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        #tzSelect {
+            cursor: pointer;
+            width: 155px;
+            font-size: 0.85rem;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        #tzSelect:hover {
+            background-color: #343a40 !important;
+            border-color: #adb5bd !important;
+        }
+
+        #btnManageCity {
+            color: #00ffff !important;
+            border: 1px solid #00ffff !important;
+            background-color: rgba(0, 255, 255, 0.12) !important;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-size: 0.85rem;
+        }
+
+        #btnManageCity:hover {
+            background-color: #00ffff !important;
+            color: #030611 !important;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        .top-action-bar {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        #btnLangToggle {
+            color: #70c5ff !important;
+            border: 1px solid #70c5ff !important;
+            background-color: rgba(112, 197, 255, 0.12) !important;
+            transition: all 0.2s ease;
+        }
+
+        #btnLangToggle:hover {
+            color: #0b0c16 !important;
+            background-color: #70c5ff !important;
+            box-shadow: 0 0 10px rgba(112, 197, 255, 0.5);
         }
 
         #dateTitle {
@@ -101,16 +171,19 @@
             user-select: none;
         }
 
+        /* ===== 數字時鐘面板：防止字體過大或換行 ===== */
         .digital-clock {
-            width: 65%;
-            padding: 20px 10px;
+            width: 80%;
+            max-width: 520px;
+            padding: 16px 10px;
             color: #ffffff;
             border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 12px;
             font-family: 'Rowdies', Arial, Helvetica, sans-serif;
-            font-size: 4.8vw;
+            font-size: clamp(1.8rem, 4.4vw, 3.6rem); /* 自適應字級，設定上下限 */
             font-weight: 400;
             letter-spacing: 2px;
+            white-space: nowrap; /* 強制不折行 */
             background-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(30, 35, 45, 0.7));
             text-shadow: 0 0 8px #ff0;
             user-select: none;
@@ -127,61 +200,18 @@
             gap: 8px;
         }
 
-        .top-action-bar {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 10;
-            display: flex;
-            gap: 6px;
-        }
-
-        .timezone-box {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            z-index: 10;
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-
-        #tzSelect {
-            cursor: pointer;
-            width: 175px;
-            transition: background-color 0.2s ease, border-color 0.2s ease;
-        }
-
-        #tzSelect:hover {
-            background-color: #343a40 !important;
-            border-color: #adb5bd !important;
-        }
-
-        #btnManageCity {
-            color: #00ffff !important;
-            border: 1px solid #00ffff !important;
-            background-color: rgba(0, 255, 255, 0.12) !important;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-        #btnManageCity:hover {
-            background-color: #00ffff !important;
-            color: #030611 !important;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
-        }
-
-        #btnLangToggle {
-            color: #70c5ff !important;
-            border: 1px solid #70c5ff !important;
-            background-color: rgba(112, 197, 255, 0.12) !important;
-            transition: all 0.2s ease;
-        }
-
-        #btnLangToggle:hover {
-            color: #0b0c16 !important;
-            background-color: #70c5ff !important;
-            box-shadow: 0 0 10px rgba(112, 197, 255, 0.5);
+        @media (max-width: 576px) {
+            .clockArea {
+                padding-top: 85px; /* 手機超窄螢幕折行時增加上方距離 */
+            }
+            #tzSelect {
+                width: 135px;
+                font-size: 0.78rem;
+            }
+            .top-action-bar .btn-group .btn {
+                font-size: 0.78rem;
+                padding: 0.25rem 0.45rem;
+            }
         }
     </style>
 </head>
@@ -198,39 +228,45 @@
             <div class="card col-sm-8 mx-auto p-0 shadow">
 
                 <div class="clockArea" id="clockArea">
-                    <div class="timezone-box" id="timezoneWrap">
-                        <select class="form-select form-select-sm bg-dark text-white border-secondary" id="tzSelect"
-                            onchange="changeTimezone()">
-                            <optgroup label="內建城市 (Built-in)" id="builtInGroup">
-                                <option value="local" selected id="optLocal">本地時間 (Local)</option>
-                                <option value="Asia/Taipei" id="optTpe">台北 (UTC+8)</option>
-                                <option value="Asia/Tokyo" id="optTyo">東京 (UTC+9)</option>
-                                <option value="Asia/Seoul" id="optSel">首爾 (UTC+9)</option>
-                                <option value="Europe/London" id="optLon">倫敦 (UTC+0/+1)</option>
-                                <option value="Europe/Paris" id="optPar">巴黎 (UTC+1/+2)</option>
-                                <option value="America/New_York" id="optNyc">紐約 (UTC-5/-4)</option>
-                                <option value="America/Los_Angeles" id="optLax">洛杉磯 (UTC-8/-7)</option>
-                                <option value="Australia/Sydney" id="optSyd">雪梨 (UTC+10/+11)</option>
-                            </optgroup>
-                            <optgroup label="自訂城市 (Custom)" id="customGroup" style="display:none;"></optgroup>
-                        </select>
-                        <button type="button" class="btn btn-sm" id="btnManageCity" data-bs-toggle="modal"
-                            data-bs-target="#cityModal" title="管理/新增自訂城市">➕ 城市</button>
-                    </div>
-
-                    <div class="top-action-bar">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-outline-light btn-sm active" id="modeClockBtn"
-                                onclick="switchMode('clock')">時鐘</button>
-                            <button type="button" class="btn btn-outline-light btn-sm" id="modeSwBtn"
-                                onclick="switchMode('stopwatch')">馬錶</button>
-                            <button type="button" class="btn btn-outline-light btn-sm" id="modeCdBtn"
-                                onclick="switchMode('countdown')">倒數計時</button>
+                    <!-- 頂部控制列總容器 -->
+                    <div class="top-controls-container">
+                        <!-- 左側：城市與時區選單 -->
+                        <div class="timezone-box" id="timezoneWrap">
+                            <select class="form-select form-select-sm bg-dark text-white border-secondary" id="tzSelect"
+                                onchange="changeTimezone()">
+                                <optgroup label="內建城市 (Built-in)" id="builtInGroup">
+                                    <option value="local" selected id="optLocal">本地時間 (Local)</option>
+                                    <option value="Asia/Taipei" id="optTpe">台北 (UTC+8)</option>
+                                    <option value="Asia/Tokyo" id="optTyo">東京 (UTC+9)</option>
+                                    <option value="Asia/Seoul" id="optSel">首爾 (UTC+9)</option>
+                                    <option value="Europe/London" id="optLon">倫敦 (UTC+0/+1)</option>
+                                    <option value="Europe/Paris" id="optPar">巴黎 (UTC+1/+2)</option>
+                                    <option value="America/New_York" id="optNyc">紐約 (UTC-5/-4)</option>
+                                    <option value="America/Los_Angeles" id="optLax">洛杉磯 (UTC-8/-7)</option>
+                                    <option value="Australia/Sydney" id="optSyd">雪梨 (UTC+10/+11)</option>
+                                </optgroup>
+                                <optgroup label="自訂城市 (Custom)" id="customGroup" style="display:none;"></optgroup>
+                            </select>
+                            <button type="button" class="btn btn-sm" id="btnManageCity" data-bs-toggle="modal"
+                                data-bs-target="#cityModal" title="管理/新增自訂城市">➕ 城市</button>
                         </div>
-                        <button type="button" class="btn btn-sm fw-bold" id="btnLangToggle"
-                            onclick="toggleLanguage()">EN</button>
+
+                        <!-- 右側：功能模式與語言切換 -->
+                        <div class="top-action-bar">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-light btn-sm active" id="modeClockBtn"
+                                    onclick="switchMode('clock')">時鐘</button>
+                                <button type="button" class="btn btn-outline-light btn-sm" id="modeSwBtn"
+                                    onclick="switchMode('stopwatch')">馬錶</button>
+                                <button type="button" class="btn btn-outline-light btn-sm" id="modeCdBtn"
+                                    onclick="switchMode('countdown')">倒數計時</button>
+                            </div>
+                            <button type="button" class="btn btn-sm fw-bold" id="btnLangToggle"
+                                onclick="toggleLanguage()">EN</button>
+                        </div>
                     </div>
 
+                    <!-- 日期與時鐘本體 -->
                     <h5 name="title" id="dateTitle">Hello, world!</h5>
                     <div class="digital-clock" id="mainDisplay">00:00:00 AM</div>
                 </div>
@@ -334,7 +370,7 @@
         </div>
     </div>
 
-    <!-- Modal 0: 自訂城市管理視窗 (支援單欄輸入自動抓取) -->
+    <!-- Modal 0: 自訂城市管理視窗 -->
     <div class="modal fade" id="cityModal" tabindex="-1" aria-labelledby="cityModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-lg">
             <div class="modal-content">
@@ -344,8 +380,6 @@
                 </div>
                 <div class="modal-body">
                     <div class="container-fluid">
-
-                        <!-- 單一城市名稱快速自動新增區 -->
                         <div class="card mb-3 border-primary shadow-sm">
                             <div class="card-body bg-light text-start p-3">
                                 <label class="form-label fw-bold mb-1" id="lblCityInputGuide">城市名稱（只需輸入地名，自動獲取時區與經緯度）：</label>
@@ -369,7 +403,6 @@
                                 </div>
                                 <div id="citySearchStatus" class="small mt-2" style="display:none;"></div>
 
-                                <!-- 快速填入標籤 -->
                                 <div class="d-flex flex-wrap gap-1 align-items-center mt-2">
                                     <span class="small text-muted" id="lblQuickPresets">快速點選試用：</span>
                                     <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2"
@@ -386,7 +419,6 @@
                                         onclick="quickFillAndAdd('São Paulo')">聖保羅 (São Paulo)</button>
                                 </div>
 
-                                <!-- 手動進階設定摺疊開關 -->
                                 <div class="mt-2 text-end">
                                     <a class="small text-decoration-none" data-bs-toggle="collapse"
                                         href="#manualCityCollapse" role="button" aria-expanded="false"
@@ -395,7 +427,6 @@
                                     </a>
                                 </div>
 
-                                <!-- 手動指定經緯度折疊區 -->
                                 <div class="collapse mt-2" id="manualCityCollapse">
                                     <hr class="my-2">
                                     <form id="manualCityForm" class="row g-2 align-items-end text-start">
@@ -428,7 +459,6 @@
                             </div>
                         </div>
 
-                        <!-- 已儲存城市列表 -->
                         <h6 class="text-start fw-bold" id="lblSavedCities">已儲存的自訂城市</h6>
                         <table class="table table-bordered table-hover text-center align-middle" id="customCityTable">
                             <thead class="table-light">
@@ -721,7 +751,6 @@
                 confirmClearAllAlarms: "確認清除所有鬧鐘設定？",
                 confirmDelSw: "確認刪除該記憶設定？",
                 confirmClearAllSw: "確認清除所有記憶設定？",
-                // 城市管理語系
                 btnManageCity: "➕ 城市",
                 cityModalTitle: "🌍 自訂城市管理",
                 lblCityInputGuide: "城市名稱（只需輸入地名，自動獲取時區與經緯度）：",
@@ -813,7 +842,6 @@
                 confirmClearAllAlarms: "Delete all alarms?",
                 confirmDelSw: "Delete this record?",
                 confirmClearAllSw: "Clear all records?",
-                // 城市管理語系
                 btnManageCity: "➕ City",
                 cityModalTitle: "🌍 Custom City Management",
                 lblCityInputGuide: "City Name (Coordinates & Timezone fetched automatically):",
@@ -908,7 +936,6 @@
             document.getElementById("thSwAction").innerText = t.thAction;
             document.getElementById("btnClearAllSw").innerText = t.btnClearAllSw;
 
-            // 城市介面文字更新
             document.getElementById("btnManageCity").innerText = t.btnManageCity;
             document.getElementById("cityModalLabel").innerText = t.cityModalTitle;
             document.getElementById("lblCityInputGuide").innerText = t.lblCityInputGuide;
@@ -1055,7 +1082,6 @@
             statusEl.style.display = "block";
         }
 
-        // 核心：透過名稱自動查找經緯度與時區
         async function searchAndAddCity() {
             const inputEl = document.getElementById("autoCityName");
             const spinner = document.getElementById("addCitySpinner");
@@ -1093,7 +1119,6 @@
                     return;
                 }
 
-                // 驗證時區是否有效
                 try {
                     new Intl.DateTimeFormat('en-US', { timeZone: tz }).format(new Date());
                 } catch (e) {
@@ -1101,7 +1126,6 @@
                     return;
                 }
 
-                // 加入自訂清單（覆蓋同名或同時區）
                 customCities = customCities.filter(c => c.tz !== tz && c.name !== displayName);
                 customCities.push({
                     name: displayName,
@@ -1131,7 +1155,6 @@
             searchAndAddCity();
         }
 
-        // 手動新增城市備援
         function addManualCity() {
             const name = document.getElementById("manCityName").value.trim();
             const tz = document.getElementById("manCityTz").value.trim();
@@ -1408,7 +1431,7 @@
         });
 
         // ------------------------------------------
-        // 2. 馬錶核心功能 (分:秒:1/10秒)
+        // 2. 馬錶核心功能
         // ------------------------------------------
         let swInterval = null;
         let totalCentiseconds = 0;
@@ -1581,7 +1604,7 @@
         };
 
         // ------------------------------------------
-        // 3. 倒數計時器核心功能 (Countdown Timer)
+        // 3. 倒數計時器核心功能
         // ------------------------------------------
         let cdInterval = null;
         let cdRemainingSeconds = 10;
@@ -1936,14 +1959,14 @@
         })();
 
         // ------------------------------------------
-        // 7. Three.js 真實 3D 旋轉地球與無裁切柔和大氣光暈
+        // 7. Three.js 真實 3D 旋轉地球 (已完全支援 RWD 自適應)
         // ------------------------------------------
         function initThreeGlobe() {
             const container = document.getElementById("globeContainer");
             if (!container) return;
 
-            const width = 860;
-            const height = 860;
+            let width = container.clientWidth || 860;
+            let height = container.clientHeight || 860;
 
             const scene = new THREE.Scene();
             
@@ -1954,6 +1977,17 @@
             renderer.setSize(width, height);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
+
+            // 響應式事件監聽：隨螢幕自適應重繪地球畫布
+            window.addEventListener('resize', () => {
+                const newWidth = container.clientWidth;
+                const newHeight = container.clientHeight;
+                if (newWidth > 0 && newHeight > 0) {
+                    camera.aspect = newWidth / newHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(newWidth, newHeight);
+                }
+            });
 
             const earthGroup = new THREE.Group();
             scene.add(earthGroup);
