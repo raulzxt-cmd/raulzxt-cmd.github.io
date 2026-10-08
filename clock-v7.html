@@ -96,7 +96,7 @@
             transition: background 0.3s ease;
         }
 
-        /* ===== 頂部整合控制列 (解決重疊問題的核心) ===== */
+        /* ===== 頂部整合控制列 ===== */
         .top-controls-container {
             position: absolute;
             top: 12px;
@@ -273,8 +273,9 @@
 
                 <div class="card-body">
                     <svg id="bsIcon" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                        class="bi bi-alarm animated wobble infinite mx-auto" viewBox="0 0 16 16"
-                        style="width: 8%; display: none; margin-bottom: 10px;">
+                        class="bi bi-alarm animated wobble infinite mx-auto text-danger" viewBox="0 0 16 16"
+                        style="width: 8%; display: none; margin-bottom: 10px; cursor: pointer;"
+                        onclick="silenceAlarm()" title="點擊停止鬧鐘">
                         <path
                             d="M8.5 5.5a.5.5 0 0 0-1 0v3.362l-1.429 2.38a.5.5 0 1 0 .858.515l1.5-2.5A.5.5 0 0 0 8.5 9z" />
                         <path
@@ -666,7 +667,7 @@
             banner.innerHTML = `
                 <strong>⏰ ${title}</strong><br>
                 ${currentLang === 'zh' ? '時間' : 'Time'}：${timeStr} ｜ ${currentLang === 'zh' ? '備註' : 'Note'}：${remark}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="silenceAlarm()"></button>
             `;
             document.body.appendChild(banner);
         }
@@ -1006,6 +1007,10 @@
 
         let currentMode = 'clock';
         let selectedTimezone = 'local';
+
+        // 鬧鐘執行狀態控管變數
+        let activeAlarmAudioTimer = null;
+        let alarmAutoStopTimeout = null;
         let lastTriggeredSecondStamp = -1;
 
         function getCityCoords(tz) {
@@ -1258,6 +1263,51 @@
         }
 
         // ------------------------------------------
+        // 鬧鈴控制：響鈴1分鐘循環與關閉邏輯
+        // ------------------------------------------
+        function triggerAlarm(remarkText, timeStr) {
+            silenceAlarm(); // 觸發前先確保前一個狀態清除
+
+            const tLang = i18n[currentLang];
+            let alarmIcon = document.getElementById("bsIcon");
+            if (alarmIcon) {
+                alarmIcon.style.setProperty("display", "block", "important");
+            }
+
+            showAlarmBanner(tLang.alarmTriggerTitle, remarkText, timeStr);
+
+            // 1. 立即播放並每隔 1.2 秒循環發聲
+            playBeep();
+            activeAlarmAudioTimer = setInterval(() => {
+                playBeep();
+            }, 1200);
+
+            // 2. 滿 60 秒 (1分鐘) 後自動停止
+            alarmAutoStopTimeout = setTimeout(() => {
+                silenceAlarm();
+            }, 60000);
+        }
+
+        function silenceAlarm() {
+            if (activeAlarmAudioTimer !== null) {
+                clearInterval(activeAlarmAudioTimer);
+                activeAlarmAudioTimer = null;
+            }
+            if (alarmAutoStopTimeout !== null) {
+                clearTimeout(alarmAutoStopTimeout);
+                alarmAutoStopTimeout = null;
+            }
+
+            let alarmIcon = document.getElementById("bsIcon");
+            if (alarmIcon) {
+                alarmIcon.style.display = "none";
+            }
+
+            let oldBanner = document.getElementById("alarmBannerAlert");
+            if (oldBanner) oldBanner.remove();
+        }
+
+        // ------------------------------------------
         // 1. 系統時鐘核心功能
         // ------------------------------------------
         var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -1325,10 +1375,10 @@
 
             const totalSecOfDay = curHours * 3600 + curMinutes * 60 + curSeconds;
 
-            let isAlarmActive = false;
-            let alarmRemark = "";
-
+            // 鬧鐘比對：移除 break，支援多筆重複時間整合觸發
             if (timerObject && timerObject.length > 0) {
+                let triggeredRemarks = [];
+
                 for (let i = 0; i < timerObject.length; i++) {
                     let isEnabled = (timerObject[i].enable === 'checked' || timerObject[i].enable === true || timerObject[i].enable === 'true');
                     let itemHour = Number(timerObject[i].hour);
@@ -1336,26 +1386,15 @@
                     let itemSec = Number(timerObject[i].seconds !== undefined ? timerObject[i].seconds : 0);
 
                     if (itemHour === curHours && itemMin === curMinutes && itemSec === curSeconds && isEnabled) {
-                        isAlarmActive = true;
-                        alarmRemark = timerObject[i].remark || tLang.defaultAlarmRemark;
-                        break;
+                        triggeredRemarks.push(timerObject[i].remark || tLang.defaultAlarmRemark);
                     }
                 }
 
-                let alarmIcon = document.getElementById("bsIcon");
-                if (alarmIcon) {
-                    if (isAlarmActive) {
-                        alarmIcon.style.setProperty("display", "block", "important");
-                        playBeep();
-
-                        if (lastTriggeredSecondStamp !== totalSecOfDay) {
-                            lastTriggeredSecondStamp = totalSecOfDay;
-                            showAlarmBanner(tLang.alarmTriggerTitle, alarmRemark, `${addZero(curHours)}:${addZero(curMinutes)}:${addZero(curSeconds)}`);
-                        }
-                    } else {
-                        if (lastTriggeredSecondStamp !== totalSecOfDay) {
-                            alarmIcon.style.display = "none";
-                        }
+                // 當秒數抵達且未被重複觸發時啟動連續1分鐘鬧鈴
+                if (triggeredRemarks.length > 0) {
+                    if (lastTriggeredSecondStamp !== totalSecOfDay) {
+                        lastTriggeredSecondStamp = totalSecOfDay;
+                        triggerAlarm(triggeredRemarks.join("、"), `${h}:${m}:${s}`);
                     }
                 }
             }
@@ -1393,12 +1432,14 @@
             clockUpdate();
         });
 
+        // 按停止時同步關閉鬧鈴與圖示
         document.getElementById("btnClockStop").addEventListener("click", function () {
             const t = i18n[currentLang];
             if (clockInterval !== null) {
                 clearInterval(clockInterval);
                 clockInterval = null;
                 this.innerText = t.btnStart;
+                silenceAlarm(); // 停止時鐘時關閉響鈴與圖示
             } else {
                 clockInterval = setInterval(clockUpdate, 1000);
                 this.innerText = t.btnStop;
@@ -1661,14 +1702,7 @@
                             btnCdStart.innerText = t.btnCdStart;
                             btnCdStart.className = "btn btn-outline-primary";
 
-                            let alarmIcon = document.getElementById("bsIcon");
-                            alarmIcon.style.setProperty("display", "block", "important");
-                            playBeep();
-
-                            showAlarmBanner(t.cdEndTitle, t.cdEndRemark, "00:00:00");
-                            setTimeout(() => {
-                                alarmIcon.style.display = "none";
-                            }, 5000);
+                            triggerAlarm(t.cdEndRemark, "00:00:00");
                         }
                     }
                 }, 1000);
