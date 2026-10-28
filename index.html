@@ -80,39 +80,78 @@
       color: #475569;
     }
 
-    /* 專案標籤內的額外連結樣式 */
+    /* 專案標籤內的額外連結樣式（霓虹增亮 + 呼吸脈衝發光 + 靠左切齊） */
     .project-sublink {
       display: inline-block;
-      margin-left: 10px;
-      padding: 2px 8px;
+      margin-left: 0 !important; /* 歸零靠左切齊 */
+      margin-top: 10px;          /* 垂直間距 */
+      padding: 3px 10px;
       border-radius: 4px;
-      border: 1px solid rgba(123, 154, 240, 0.4);
+      border: 1px solid #64ffda;
       color: #64ffda;
+      font-weight: 600;
       text-decoration: none;
-      font-size: 0.78rem;
-      transition: all 0.2s ease;
+      font-size: 0.8rem;
+      background-color: rgba(100, 255, 218, 0.08);
+      cursor: pointer;
+      vertical-align: middle;
+      transition: all 0.25s ease;
+      animation: sublink-pulse-dark 2.4s infinite ease-in-out;
+    }
+
+    @keyframes sublink-pulse-dark {
+      0%,
+      100% {
+        border-color: rgba(100, 255, 218, 0.4);
+        box-shadow: 0 0 6px rgba(100, 255, 218, 0.2), inset 0 0 4px rgba(100, 255, 218, 0.05);
+      }
+
+      50% {
+        border-color: #64ffda;
+        box-shadow: 0 0 16px rgba(100, 255, 218, 0.65), inset 0 0 8px rgba(100, 255, 218, 0.2);
+        color: #ffffff;
+      }
     }
 
     .project-sublink:hover {
-      background-color: rgba(100, 255, 218, 0.12);
+      background-color: rgba(100, 255, 218, 0.22);
       border-color: #64ffda;
       color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px rgba(100, 255, 218, 0.8), inset 0 0 10px rgba(100, 255, 218, 0.3);
+      animation: none;
     }
 
     body.light-theme .project-sublink {
-      border-color: rgba(37, 99, 235, 0.4);
+      border-color: #2563eb;
       color: #2563eb;
+      background-color: rgba(37, 99, 235, 0.06);
+      animation: sublink-pulse-light 2.4s infinite ease-in-out;
+    }
+
+    @keyframes sublink-pulse-light {
+      0%,
+      100% {
+        border-color: rgba(37, 99, 235, 0.4);
+        box-shadow: 0 0 4px rgba(37, 99, 235, 0.15);
+      }
+
+      50% {
+        border-color: #2563eb;
+        box-shadow: 0 0 14px rgba(37, 99, 235, 0.45);
+      }
     }
 
     body.light-theme .project-sublink:hover {
-      background-color: rgba(37, 99, 235, 0.08);
+      background-color: rgba(37, 99, 235, 0.14);
       border-color: #2563eb;
-      color: #1e293b;
+      color: #1d4ed8;
+      box-shadow: 0 0 16px rgba(37, 99, 235, 0.5);
+      animation: none;
     }
 
     /* 漢堡選單（手機抽屜）展開時的規格微調 */
     @media (max-width: 768px) {
-
       .navbar .nav-links .btn-resume,
       .btn-lang-toggle,
       .btn-theme-toggle {
@@ -315,13 +354,19 @@
             <span class="project-num">_01.</span>
             <div class="project-info">
               <h3 class="project-title"><span id="proj-title-1">Go Camp E-Commercial Official Site Front-End</span>
-                <span class="external-icon">↗</span></h3>
+                <span class="external-icon">↗</span>
+              </h3>
               <p class="project-tags">PHP <span>•</span> MySQL <span>•</span> Bootstrap <span>•</span> HTML & CSS</p>
+              <span class="project-sublink"
+                onclick="event.stopPropagation(); window.open('images/GoCamp%E5%9F%8B%E8%A8%AD%E7%A8%8B%E5%BC%8F%E7%A2%BC%20-%20GA4%20%E9%9B%BB%E5%95%86%E5%B7%A8%E9%87%8F%E6%95%B8%E6%93%9A%E5%88%86%E6%9E%90.jpg', '_blank');"
+                title="查看 GA4 埋設與數據分析結果">
+                <span id="proj-sublink-1">📊 GoCamp E-Commerce Front-End Tracking Code & GA4 Big Data Analytics ↗</span>
+              </span>
             </div>
           </div>
         </a>
 
-        <!-- 專案 02: Go Camp 後台 (已對應修改後的 GoCampBack.png) -->
+        <!-- 專案 02: Go Camp 後台 -->
         <a href="http://43.213.4.75/GoCampV3/admin/login.php" target="_blank" class="project-item"
           data-img="images/GoCampBack.png">
           <div class="project-left">
@@ -342,19 +387,17 @@
             <div class="project-info">
               <h3 class="project-title"><span id="proj-title-3">E-Commerce LP & Official Site</span> <span
                   class="external-icon">↗</span></h3>
-              <p class="project-tags">
-                Google Site <span>•</span> GA & GA4 <span>•</span> Google Ad & Yahoo Native & Line Ad & MS Ad
-                <span class="project-sublink"
-                  onclick="event.stopPropagation(); window.open('https://docs.google.com/document/d/1zOdMeUcDIaemBNKPl39L3Z-8iVnlkiwZBJupJ_dcVBs/edit?usp=sharing', '_blank');"
-                  title="開啟廣告投放與行銷履歷">
-                  📄 Resume for Ad Buyer / Digital Marketer ↗
-                </span>
-              </p>
+              <p class="project-tags">Google Site <span>•</span> GA & GA4 <span>•</span> Google Ad & Yahoo Native & Line Ad & MS Ad</p>
+              <span class="project-sublink"
+                onclick="event.stopPropagation(); window.open('https://docs.google.com/document/d/1zOdMeUcDIaemBNKPl39L3Z-8iVnlkiwZBJupJ_dcVBs/edit?usp=sharing', '_blank');"
+                title="開啟廣告投放與行銷履歷">
+                <span id="proj-sublink-3">📄 Resume for Ad Buyer / Digital Marketer ↗</span>
+              </span>
             </div>
           </div>
         </a>
 
-        <!-- 專案 04: Figma Hotel (使用 URL 編碼處理空格) -->
+        <!-- 專案 04: Figma Hotel -->
         <a href="https://www.figma.com/proto/Dai2B7wAtFMEK1fwlXKkEH/Hotel-Project?node-id=5-27&starting-point-node-id=5%3A27"
           target="_blank" class="project-item" data-img="images/Figma%20Hotel%20PROJECT.png">
           <div class="project-left">
@@ -367,7 +410,7 @@
           </div>
         </a>
 
-        <!-- 專案 05: Bootstrap Clock (使用 URL 編碼處理空格與中文字) -->
+        <!-- 專案 05: Bootstrap Clock -->
         <a href="clock-v7.html" target="_blank" class="project-item"
           data-img="images/Bootstrap%20clock%20V7%20-%203D%20Real%20Globe%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201.jpg">
           <div class="project-left">
@@ -380,7 +423,7 @@
           </div>
         </a>
 
-        <!-- 專案 06: Super Lotto Sim (使用 URL 編碼處理空格) -->
+        <!-- 專案 06: Super Lotto Sim -->
         <a href="test0010-super-lotto-add2NewFunctionsV2.html" target="_blank" class="project-item"
           data-img="images/super%20lotto%20sim.jpg">
           <div class="project-left">
@@ -466,8 +509,10 @@
         headingStack: "My Stack",
         headingWork: "Works",
         projTitle1: "Go Camp E-Commercial Official Site Front-End",
+        projSublink1: "📊 GoCamp E-Commerce Front-End Tracking Code & GA4 Big Data Analytics ↗",
         projTitle2: "Go Camp E-Commercial Official Site Back-End",
         projTitle3: "E-Commerce LP & Official Site",
+        projSublink3: "📄 Resume for Ad Buyer / Digital Marketer ↗",
         projTitle4: "Figma Hotel Web Design",
         projTitle5: "Bootstrap Clock V7 - 3D Real Globe",
         projTitle6: "Super Lotto Sim",
@@ -500,8 +545,10 @@
         headingStack: "技術與工具",
         headingWork: "精選專案作品",
         projTitle1: "Go Camp 露營用品電商形象官網 (前台)",
+        projSublink1: "📊 GoCamp 電子商城前台埋設程式碼 串接 GA4 使用者行為數據分析結果 ↗",
         projTitle2: "Go Camp 露營用品電商後台管理系統",
         projTitle3: "電商廣告銷售頁與品牌形象官網",
+        projSublink3: "📄 數位行銷與廣告投放專業履歷 ↗",
         projTitle4: "Figma 飯店主題網頁介面設計",
         projTitle5: "Bootstrap 3D旋轉地球 多功能時鐘 V7",
         projTitle6: "威力彩．熱帶小島大尋寶模擬器",
@@ -562,10 +609,17 @@
       document.getElementById('heading-stack').innerText = t.headingStack;
       document.getElementById('heading-work').innerText = t.headingWork;
 
-      // 專案作品名稱 01 ~ 06 完全對應
+      // 專案作品名稱與補充連結按鈕中英切換
       document.getElementById('proj-title-1').innerText = t.projTitle1;
+      const sublink1 = document.getElementById('proj-sublink-1');
+      if (sublink1) sublink1.innerText = t.projSublink1;
+
       document.getElementById('proj-title-2').innerText = t.projTitle2;
+
       document.getElementById('proj-title-3').innerText = t.projTitle3;
+      const sublink3 = document.getElementById('proj-sublink-3');
+      if (sublink3) sublink3.innerText = t.projSublink3;
+
       document.getElementById('proj-title-4').innerText = t.projTitle4;
       document.getElementById('proj-title-5').innerText = t.projTitle5;
       document.getElementById('proj-title-6').innerText = t.projTitle6;

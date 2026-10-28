@@ -283,9 +283,9 @@ main {
 }
 .about-section .about-text p {
   color: #8892b0;
-  font-size: 1.3rem;
-  line-height: 1.6;
-  margin: 28px 0 0px 28px;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  margin: 0 0 16px 0;
 }
 .about-section .about-text .skills-list {
   display: grid;
@@ -554,6 +554,45 @@ html {
   }
 }
 
+/* ===== 專案額外補充按鈕（深色霓虹 + 呼吸脈衝發光） ===== */
+.project-sublink {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid #64ffda;
+  color: #00ffc3;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.8rem;
+  background-color: rgba(100, 255, 218, 0.08);
+  cursor: pointer;
+  vertical-align: middle;
+  transition: all 0.25s ease;
+  animation: sublink-pulse-dark 2.4s infinite ease-in-out;
+}
+
+@keyframes sublink-pulse-dark {
+  0%, 100% {
+    border-color: rgba(100, 255, 218, 0.4);
+    box-shadow: 0 0 6px rgba(100, 255, 218, 0.2), inset 0 0 4px rgba(100, 255, 218, 0.05);
+  }
+  50% {
+    border-color: #64ffda;
+    box-shadow: 0 0 16px rgba(100, 255, 218, 0.65), inset 0 0 8px rgba(100, 255, 218, 0.2);
+    color: #ffffff;
+  }
+}
+
+.project-sublink:hover {
+  background-color: rgba(100, 255, 218, 0.22);
+  border-color: #64ffda;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(100, 255, 218, 0.8), inset 0 0 10px rgba(100, 255, 218, 0.3);
+  animation: none;
+}
+
 /* ===== 04. Contact 區塊 ===== */
 .contact-section {
   max-width: 900px;
@@ -817,7 +856,6 @@ body.light-theme .about-section .about-pic .wrapper .img {
   transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
-/* ★ 滑鼠懸停 (Hover) 時：背景變透明、濾鏡消失，變回原本圖片色彩 */
 body.light-theme .about-section .about-pic .wrapper:hover {
   background-color: transparent;
   outline: 0;
@@ -863,6 +901,33 @@ body.light-theme .work-section .project-item:hover .project-num {
 }
 body.light-theme .work-section .project-item .project-tags {
   color: #64748b;
+}
+
+/* 亮色主題下的補充按鈕樣式與呼吸發光 */
+body.light-theme .project-sublink {
+  border-color: #2563eb;
+  color: #2563eb;
+  background-color: rgba(37, 99, 235, 0.06);
+  animation: sublink-pulse-light 2.4s infinite ease-in-out;
+}
+
+@keyframes sublink-pulse-light {
+  0%, 100% {
+    border-color: rgba(37, 99, 235, 0.4);
+    box-shadow: 0 0 4px rgba(37, 99, 235, 0.15);
+  }
+  50% {
+    border-color: #2563eb;
+    box-shadow: 0 0 14px rgba(37, 99, 235, 0.45);
+  }
+}
+
+body.light-theme .project-sublink:hover {
+  background-color: rgba(37, 99, 235, 0.14);
+  border-color: #2563eb;
+  color: #1d4ed8;
+  box-shadow: 0 0 16px rgba(37, 99, 235, 0.5);
+  animation: none;
 }
 
 /* 聯絡區塊與頁尾 */
