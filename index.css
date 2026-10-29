@@ -48,11 +48,11 @@
 .navbar .nav-links {
   display: flex;
   align-items: center;
-  gap: 12px; /* 縮小按鈕群與選項間隙 */
+  gap: 12px;
 }
 .navbar .nav-links ol {
   display: flex;
-  gap: 14px; /* 縮小 01~04 選項間距 */
+  gap: 14px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -62,7 +62,7 @@
   font-family: "SF Mono", "Fira Code", "Roboto Mono", monospace;
   font-size: 0.95rem;
   text-decoration: none;
-  white-space: nowrap; /* 核心：防止文字換行 */
+  white-space: nowrap;
   transition: color 0.2s ease;
 }
 .navbar .nav-links ol li a .nav-number {
@@ -124,7 +124,7 @@
   opacity: 1;
 }
 
-/* ===== 響應式斷點：設定為 768px（手機直向才觸發漢堡選單） ===== */
+/* ===== 響應式斷點：設定為 768px ===== */
 @media (max-width: 768px) {
   .navbar .nav-container {
     padding: 0 20px;
@@ -144,7 +144,7 @@
     box-shadow: -10px 0px 30px -15px rgba(2, 12, 27, 0.7);
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start; /* 抽屜內選項靠左對齊 */
+    align-items: flex-start;
     padding-left: 50px;
     padding-right: 30px;
     box-sizing: border-box;
@@ -157,7 +157,6 @@
     right: 0;
   }
 
-  /* 01~04 連結列表靠左 */
   .navbar .nav-links ol {
     flex-direction: column;
     align-items: flex-start;
@@ -174,7 +173,6 @@
     gap: 8px;
   }
 
-  /* 下方的按鈕群重設左邊距，靠左對齊 */
   .navbar .nav-links .btn-resume,
   .btn-theme-toggle,
   .btn-lang-toggle {
@@ -474,6 +472,11 @@ html {
   display: flex;
   align-items: flex-start;
   gap: 30px;
+  width: 100%;
+}
+.work-section .project-item .project-info {
+  flex: 1;
+  min-width: 0;
 }
 .work-section .project-item .project-num {
   font-family: "SF Mono", "Fira Code", "Roboto Mono", monospace;
@@ -481,6 +484,7 @@ html {
   color: rgba(136, 146, 176, 0.6);
   padding-top: 10px;
   transition: color 0.3s ease;
+  flex-shrink: 0;
 }
 .work-section .project-item .project-info .project-title {
   font-size: clamp(2rem, 4vw, 3.5rem);
@@ -492,18 +496,23 @@ html {
   display: flex;
   align-items: center;
   gap: 15px;
+  flex-wrap: wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 .work-section .project-item .project-info .project-title .external-icon {
   font-size: 1.8rem;
   opacity: 0;
   transform: translate(-10px, 10px);
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 .work-section .project-item .project-info .project-tags {
   font-family: "SF Mono", "Fira Code", "Roboto Mono", monospace;
   font-size: 0.9rem;
   color: #8892b0;
   margin: 0;
+  line-height: 1.6;
 }
 .work-section .project-item .project-info .project-tags span {
   margin: 0 8px;
@@ -554,10 +563,44 @@ html {
   }
 }
 
+/* ===== 手機版 (768px 以下) 專案文字排版強化防擠壓 ===== */
+@media (max-width: 768px) {
+  .work-section .project-item {
+    padding: 24px 10px;
+  }
+  .work-section .project-item .project-left {
+    gap: 12px;
+  }
+  .work-section .project-item .project-num {
+    padding-top: 4px;
+    font-size: 1rem;
+  }
+  .work-section .project-item .project-info .project-title {
+    font-size: 1.55rem !important;
+    line-height: 1.35;
+    gap: 8px;
+  }
+  .work-section .project-item .project-info .project-title .external-icon {
+    font-size: 1.25rem;
+    opacity: 0.8;
+    transform: none;
+  }
+  .work-section .project-item .project-info .project-tags {
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+  .project-sublink {
+    font-size: 0.76rem !important;
+    padding: 3px 8px !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
+  }
+}
+
 /* ===== 專案額外補充按鈕（深色霓虹 + 呼吸脈衝發光） ===== */
 .project-sublink {
   display: inline-block;
-  margin-left: 10px;
+  margin-left: 0;
   padding: 3px 10px;
   border-radius: 4px;
   border: 1px solid #64ffda;
@@ -840,19 +883,19 @@ body.light-theme .about-section .about-text p {
   color: #475569;
 }
 
-/* 亮色主題頭像處理：保持藍色濾鏡與 Hover 變色彩色效果 */
+/* 亮色主題頭像處理 */
 body.light-theme .about-section .about-pic .wrapper {
-  background-color: #abc8f7; /* 底層亮藍色 */
+  background-color: #abc8f7;
   box-shadow: 0 10px 30px -15px rgba(37, 99, 235, 0.25);
 }
 
 body.light-theme .about-section .about-pic .wrapper::after {
-  border-color: #2563eb; /* 藍色外框 */
+  border-color: #2563eb;
 }
 
 body.light-theme .about-section .about-pic .wrapper .img {
-  mix-blend-mode: multiply; /* 融入底層藍色 */
-  filter: grayscale(100%) contrast(1.1) brightness(1.1); /* 提升亮色下的對比與亮度 */
+  mix-blend-mode: multiply;
+  filter: grayscale(100%) contrast(1.1) brightness(1.1);
   transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
