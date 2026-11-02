@@ -134,7 +134,7 @@ if (canvas) {
 }
 
 // ==========================================
-// 5. Work 專案清單 Hover 圖片跟隨
+// 5. Work 專案清單 Hover 圖片跟隨（視窗相依修復版）
 // ==========================================
 const projectItems = document.querySelectorAll('.project-item');
 const previewModal = document.getElementById('project-preview');
@@ -151,10 +151,26 @@ if (previewModal && previewImg) {
       }
     });
 
-    // 滑鼠移動：讓圖片彈窗平滑跟隨座標
+    // 滑鼠移動：即時座標追蹤，搭配固定定位（Fixed）並防範邊界溢出
     item.addEventListener('mousemove', (e) => {
-      previewModal.style.left = `${e.clientX + 30}px`;
-      previewModal.style.top = `${e.clientY + 30}px`;
+      const modalWidth = 360;
+      const modalHeight = 225;
+      
+      let left = e.clientX + 24;
+      let top = e.clientY + 20;
+
+      // 若右側超出螢幕邊緣，自動翻轉至游標左側
+      if (left + modalWidth > window.innerWidth) {
+        left = e.clientX - modalWidth - 20;
+      }
+
+      // 若底部超出螢幕邊緣，自動向上推移
+      if (top + modalHeight > window.innerHeight) {
+        top = e.clientY - modalHeight - 10;
+      }
+
+      previewModal.style.left = `${left}px`;
+      previewModal.style.top = `${top}px`;
     });
 
     // 滑鼠移出：隱藏彈窗
@@ -180,7 +196,7 @@ if (logoBtn) {
 }
 
 // ==========================================
-// 6. 右下角 Go To Top 懸浮按鈕邏輯
+// 7. 右下角 Go To Top 懸浮按鈕邏輯
 // ==========================================
 const backToTopBtn = document.getElementById('back-to-top');
 
@@ -204,17 +220,15 @@ if (backToTopBtn) {
 }
 
 // ==========================================
-// 7. 右側膠囊滾動進度條 (Scroll Progress)
+// 8. 右側膠囊滾動進度條 (Scroll Progress)
 // ==========================================
 const scrollProgressBar = document.getElementById('scroll-progress-bar');
 
 if (scrollProgressBar) {
   window.addEventListener('scroll', () => {
-    // 總可滾動高度 = 頁面總高度 - 視窗高度
     const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
     
     if (totalHeight > 0) {
-      // 當前滾動百分比
       const progress = (window.scrollY / totalHeight) * 100;
       scrollProgressBar.style.height = `${progress}%`;
     }

@@ -532,39 +532,43 @@ html {
   opacity: 1;
   transform: translate(0, 0);
 }
-.work-section .project-preview-modal {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%) scale(0.9);
-  width: 380px;
-  height: 240px;
+
+/* ===== 專案作品懸浮預覽彈窗（核心修正：固定於視窗，解決向上消失問題） ===== */
+.work-section .project-preview-modal,
+.project-preview-modal {
+  position: fixed !important;
+  width: 360px;
+  height: 225px;
   border-radius: 8px;
   overflow: hidden;
   pointer-events: none;
-  z-index: 10;
+  z-index: 99999 !important;
   opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(123, 154, 240, 0.3);
+  visibility: hidden;
+  transform: scale(0.92);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1.5px rgba(100, 255, 218, 0.4);
 }
-.work-section .project-preview-modal.active {
+.work-section .project-preview-modal.active,
+.project-preview-modal.active {
   opacity: 1;
-  transform: translateY(-50%) scale(1);
+  visibility: visible;
+  transform: scale(1);
 }
-.work-section .project-preview-modal img {
+.work-section .project-preview-modal img,
+.project-preview-modal img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-@media (max-width: 400px) {
-  .work-section .project-preview-modal {
-    display: none;
-  }
-}
 
 /* ===== 手機版 (768px 以下) 專案文字排版強化防擠壓 ===== */
 @media (max-width: 768px) {
+  .work-section .project-preview-modal,
+  .project-preview-modal {
+    display: none !important;
+  }
   .work-section .project-item {
     padding: 24px 10px;
   }
