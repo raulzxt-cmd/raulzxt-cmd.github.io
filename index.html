@@ -20,19 +20,21 @@
   <link rel="stylesheet" href="index.css">
 
   <style>
-    /* 導覽列右側三顆按鈕：精緻輕量化尺寸 */
+    /* 導覽列右側三顆按鈕：自適應寬度 + 徹底防爆框與去除焦點外框 */
     .navbar .nav-links .btn-resume,
     .btn-lang-toggle,
     .btn-theme-toggle {
-      width: 82px;
+      width: auto;
+      min-width: 72px;
+      padding: 0 10px;
       height: 30px;
-      padding: 0;
       margin: 0 0 0 6px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-family: "SF Mono", "Fira Code", "Roboto Mono", monospace;
       font-size: 0.75rem;
+      letter-spacing: -0.2px;
       border-radius: 4px;
       box-sizing: border-box;
       text-decoration: none;
@@ -43,6 +45,8 @@
       background: transparent;
       border: 1px solid #64ffda;
       color: #64ffda;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .btn-lang-toggle:hover,
@@ -50,6 +54,20 @@
       background-color: rgba(100, 255, 218, 0.12);
       box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
       transform: translateY(-1px);
+    }
+
+    /* 消除 macOS Chrome/Safari 點擊產生的白藍焦點外框 */
+    .navbar .nav-links .btn-resume:focus,
+    .btn-lang-toggle:focus,
+    .btn-theme-toggle:focus,
+    .navbar .nav-links .btn-resume:focus-visible,
+    .btn-lang-toggle:focus-visible,
+    .btn-theme-toggle:focus-visible,
+    .navbar .nav-links .btn-resume:active,
+    .btn-lang-toggle:active,
+    .btn-theme-toggle:active {
+      outline: none !important;
+      box-shadow: none !important;
     }
 
     /* 亮色主題樣式相容 */
