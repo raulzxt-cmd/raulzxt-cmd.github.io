@@ -533,7 +533,7 @@ html {
   transform: translate(0, 0);
 }
 
-/* ===== 專案作品懸浮預覽彈窗（核心修正：固定於視窗，解決向上消失問題） ===== */
+/* ===== 專案作品懸浮預覽彈窗（核心修正：固定於視窗，徹底解決滾動後消失問題） ===== */
 .work-section .project-preview-modal,
 .project-preview-modal {
   position: fixed !important;
@@ -729,13 +729,14 @@ html {
   font-weight: 700;
 }
 
-/* 回到頂部按鈕 */
+/* ===== 回到頂部按鈕：精緻置中微型排版（徹底杜絕文字溢出） ===== */
 .back-to-top-btn {
   position: fixed;
   bottom: 40px;
   right: 40px;
   width: 44px;
   height: 44px;
+  padding: 0;
   background-color: rgba(17, 34, 64, 0.85);
   border: 1px solid rgba(123, 154, 240, 0.4);
   color: #7b9af0;
@@ -743,6 +744,7 @@ html {
   cursor: pointer;
   z-index: 99;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(8px);
@@ -751,24 +753,41 @@ html {
   visibility: hidden;
   transform: translateY(15px);
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+  outline: none !important;
 }
+
 .back-to-top-btn.show {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
+
 .back-to-top-btn:hover {
   background-color: rgba(123, 154, 240, 0.15);
   border-color: #7b9af0;
   box-shadow: 0 0 15px rgba(123, 154, 240, 0.3);
   transform: translateY(-3px);
+  color: #64ffda;
 }
+
 .back-to-top-btn svg {
+  width: 20px;
+  height: 20px;
   transition: transform 0.2s ease;
 }
+
 .back-to-top-btn:hover svg {
   transform: translateY(-2px);
 }
+
+.back-to-top-btn .btn-text {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 0.6rem;
+  line-height: 1;
+  margin-top: 2px;
+  letter-spacing: 0.5px;
+}
+
 @media (max-width: 768px) {
   .back-to-top-btn {
     bottom: 25px;
@@ -997,7 +1016,7 @@ body.light-theme .contact-section .footer-divider .copyright .highlight {
   color: #2563eb;
 }
 
-/* 回到頂部按鈕 */
+/* 回到頂部按鈕 (亮色模式) */
 body.light-theme .back-to-top-btn {
   background-color: #ffffff;
   border-color: #cbd5e1;
@@ -1007,4 +1026,5 @@ body.light-theme .back-to-top-btn {
 body.light-theme .back-to-top-btn:hover {
   background-color: #f1f5f9;
   border-color: #2563eb;
+  color: #1d4ed8;
 }

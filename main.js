@@ -134,7 +134,7 @@ if (canvas) {
 }
 
 // ==========================================
-// 5. Work 專案清單 Hover 圖片跟隨（視窗相依修復版）
+// 5. Work 專案清單 Hover 圖片跟隨（視窗相依 + 邊界防溢出修復版）
 // ==========================================
 const projectItems = document.querySelectorAll('.project-item');
 const previewModal = document.getElementById('project-preview');
@@ -226,9 +226,11 @@ const scrollProgressBar = document.getElementById('scroll-progress-bar');
 
 if (scrollProgressBar) {
   window.addEventListener('scroll', () => {
+    // 總可滾動高度 = 頁面總高度 - 視窗高度
     const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
     
     if (totalHeight > 0) {
+      // 當前滾動百分比
       const progress = (window.scrollY / totalHeight) * 100;
       scrollProgressBar.style.height = `${progress}%`;
     }
