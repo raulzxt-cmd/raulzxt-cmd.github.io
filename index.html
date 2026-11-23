@@ -98,10 +98,11 @@
       color: #475569;
     }
 
-    /* 專案標籤內的額外連結樣式（霓虹增亮 + 呼吸脈衝發光 + 靠左切齊） */
+    /* 專案標籤內的額外連結樣式（霓虹增亮 + 呼吸脈衝發光 + 靠左切齊與多按鈕並排間距） */
     .project-sublink {
       display: inline-block;
       margin-left: 0 !important;
+      margin-right: 10px;
       margin-top: 10px;
       padding: 3px 10px;
       border-radius: 4px;
@@ -375,11 +376,18 @@
                 <span class="external-icon">↗</span>
               </h3>
               <p class="project-tags">PHP <span>•</span> MySQL <span>•</span> Bootstrap <span>•</span> HTML & CSS <span>•</span> GA4 <span>•</span> AWS <span>•</span> JavaScript</p>
-              <span class="project-sublink"
-                onclick="event.stopPropagation(); window.open('images/GoCamp%E5%9F%8B%E8%A8%AD%E7%A8%8B%E5%BC%8F%E7%A2%BC%20-%20GA4%20%E9%9B%BB%E5%95%86%E5%B7%A8%E9%87%8F%E6%95%B8%E6%93%9A%E5%88%86%E6%9E%90.jpg', '_blank');"
-                title="查看 GA4 埋設與數據分析結果">
-                <span id="proj-sublink-1">📊 GoCamp E-Commerce Front-End Tracking Code & GA4 Big Data Analytics ↗</span>
-              </span>
+              <div class="project-sublinks-group">
+                <span class="project-sublink"
+                  onclick="event.stopPropagation(); window.open('images/GoCamp%E5%9F%8B%E8%A8%AD%E7%A8%8B%E5%BC%8F%E7%A2%BC%20-%20GA4%20%E9%9B%BB%E5%95%86%E5%B7%A8%E9%87%8F%E6%95%B8%E6%93%9A%E5%88%86%E6%9E%90.jpg', '_blank');"
+                  title="查看 GA4 埋設與數據分析結果">
+                  <span id="proj-sublink-1">📊 GoCamp E-Commerce Front-End Tracking Code & GA4 Big Data Analytics ↗</span>
+                </span>
+                <span class="project-sublink"
+                  onclick="event.stopPropagation(); window.open('https://datastudio.google.com/reporting/b57c3d52-562f-4e57-a703-db447abdbe5f', '_blank');"
+                  title="查看 Google Data Studio 報表">
+                  <span id="proj-sublink-1b">📈 GoCamp E-Commerce Google Data Studio Report ↗</span>
+                </span>
+              </div>
             </div>
           </div>
         </a>
@@ -397,7 +405,7 @@
           </div>
         </a>
 
-        <!-- 專案 03: Stock Market Dashboard (最新作品置入) -->
+        <!-- 專案 03: Stock Market Dashboard -->
         <a href="http://43.213.4.75/Stock-Dashboard/index.php" target="_blank" class="project-item"
           data-img="images/我的市場儀表板.jpg">
           <div class="project-left">
@@ -503,7 +511,7 @@
     </section>
   </main>
 
-  <!-- 右下角 Go To Top 懸浮按鈕（已精緻化排版，徹底杜絕文字溢出） -->
+  <!-- 右下角 Go To Top 懸浮按鈕 -->
   <button id="back-to-top" class="back-to-top-btn" aria-label="Back to top">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -541,6 +549,7 @@
         headingWork: "Works",
         projTitle1: "Go Camp E-Commercial Official Site Front-End",
         projSublink1: "📊 GoCamp E-Commerce Front-End Tracking Code & GA4 Big Data Analytics ↗",
+        projSublink1b: "📈 GoCamp E-Commerce Google Data Studio Report ↗",
         projTitle2: "Go Camp E-Commercial Official Site Back-End",
         projTitle3: "Stock Market Dashboard",
         projTitle4: "E-Commerce LP & Official Site",
@@ -577,6 +586,7 @@
         headingWork: "精選專案作品",
         projTitle1: "Go Camp 露營用品電商形象官網 (前台)",
         projSublink1: "📊 GoCamp 電子商城前台埋設程式碼 串接 GA4 使用者行為數據分析結果 ↗",
+        projSublink1b: "📈 電子商城連接 Google Data Studio 報表 ↗",
         projTitle2: "Go Camp 露營用品電商後台管理系統",
         projTitle3: "Stock Market Dashboard 美台股市儀表板",
         projTitle4: "電商廣告銷售頁與品牌形象官網",
@@ -645,6 +655,8 @@
       document.getElementById('proj-title-1').innerText = t.projTitle1;
       const sublink1 = document.getElementById('proj-sublink-1');
       if (sublink1) sublink1.innerText = t.projSublink1;
+      const sublink1b = document.getElementById('proj-sublink-1b');
+      if (sublink1b) sublink1b.innerText = t.projSublink1b;
 
       document.getElementById('proj-title-2').innerText = t.projTitle2;
       document.getElementById('proj-title-3').innerText = t.projTitle3;
