@@ -238,7 +238,7 @@ if (scrollProgressBar) {
 }
 
 // ==========================================
-// 9. My Stack 區塊：逐行由外向內匯聚滾動進場動畫 (3.0s)
+// 9. My Stack 區塊：雙向逐行由外向內匯聚滾動進場動畫 (3.0s)
 // ==========================================
 const stackSection = document.getElementById('stack');
 const stackGrid = document.querySelector('.stack-grid');
@@ -246,16 +246,29 @@ const stackCards = document.querySelectorAll('.stack-card');
 
 if (stackSection && stackGrid && stackCards.length > 0) {
   let revealTimers = [];
+  let lastScrollY = window.scrollY;
+  let isScrollingUp = false;
 
-  // 依據目前螢幕寬度計算每列欄位數與每張卡片的「逐行由外向內」起始偏移量
-  function calculateCardOffsets() {
+  // 即時追蹤使用者當前的滑動方向（true = 由下往上滑、false = 由上往下滑）
+  window.addEventListener('scroll', () => {
+    const currentScrollY = window.scrollY;
+    if (currentScrollY !== lastScrollY) {
+      isScrollingUp = currentScrollY < lastScrollY;
+      lastScrollY = currentScrollY;
+    }
+  }, { passive: true });
+
+  // 依據目前螢幕寬度與「滑動方向」計算每張卡片的起始偏移量與逐行延遲
+  function calculateCardOffsets(reverseVertical = false) {
     const gridStyle = window.getComputedStyle(stackGrid);
     const colCount = gridStyle.gridTemplateColumns.split(' ').length || 1;
     const totalCards = stackCards.length;
+    const totalRows = Math.ceil(totalCards / colCount);
 
     stackCards.forEach((card, index) => {
       const col = index % colCount;
       const row = Math.floor(index / colCount);
+
       // 計算該列實際擁有的卡片數量（最後一排若不足 6 張，仍以該排實際張數對稱由外向內）
       const rowStartIndex = row * colCount;
       const cardsInThisRow = Math.min(colCount, totalCards - rowStartIndex);
@@ -263,15 +276,18 @@ if (stackSection && stackGrid && stackCards.length > 0) {
 
       // 距離該列中心點的比例 (-1 最左側 ~ +1 最右側)
       const normalizedFromCenter = rowMidIndex > 0 ? (col - rowMidIndex) / rowMidIndex : 0;
-      // 距離中心越遠，水平滑入距離越大 (最大 ±90px)
       const offsetX = Math.round(normalizedFromCenter * 90);
-      // 逐行進場時搭配微微由下往上浮起，層次更清晰
-      const offsetY = 28;
 
-      // 嚴格「一行接一行」節奏：每行間隔 650ms，同一行內由外向內交錯 120ms
+      // 由上往下滑時卡片由下往上浮入 (+28px)；由下往上滑時卡片由上往下落入 (-28px)
+      const offsetY = reverseVertical ? -28 : 28;
+
+      // 同一行內由外向內交錯 120ms
       const edgeDistance = Math.abs(col - rowMidIndex);
       const withinRowDelay = Math.round((rowMidIndex - edgeDistance) * 120);
-      const rowBaseDelay = row * 650;
+
+      // 逐行順序：由上往下時第 0 排先動；由下往上時最後一排 (totalRows - 1) 最先動
+      const effectiveRow = reverseVertical ? (totalRows - 1 - row) : row;
+      const rowBaseDelay = effectiveRow * 650;
       const delay = rowBaseDelay + Math.max(0, withinRowDelay);
 
       card.style.setProperty('--reveal-x', `${offsetX}px`);
@@ -281,12 +297,12 @@ if (stackSection && stackGrid && stackCards.length > 0) {
   }
 
   // 初始化隱藏狀態
-  calculateCardOffsets();
+  calculateCardOffsets(false);
   stackCards.forEach((card) => card.classList.add('reveal-init'));
 
   window.addEventListener('resize', () => {
     if (stackCards[0].classList.contains('reveal-init') && !stackCards[0].classList.contains('is-visible')) {
-      calculateCardOffsets();
+      calculateCardOffsets(isScrollingUp);
     }
   }, { passive: true });
 
@@ -296,9 +312,12 @@ if (stackSection && stackGrid && stackCards.length > 0) {
         revealTimers.forEach((id) => clearTimeout(id));
         revealTimers = [];
 
-        calculateCardOffsets();
+        // 依進入視窗當下的滑動方向計算正序（上→下）或反序（下→上）
+        calculateCardOffsets(isScrollingUp);
 
-        // 下一幀逐行觸發滑入定位
+        // 強制瀏覽器先套用新的起始位置 (--reveal-y / --reveal-delay)，下一幀再啟動滑入
+        void stackGrid.offsetWidth;
+
         requestAnimationFrame(() => {
           stackCards.forEach((card) => {
             card.classList.add('is-visible');
@@ -313,7 +332,7 @@ if (stackSection && stackGrid && stackCards.length > 0) {
           });
         });
       } else {
-        // 當整個 My Stack 區塊完全離開視窗時，重置回初始外圍狀態，下次滑入或點擊錨點可再次逐行觸發
+        // 當整個 My Stack 區塊完全離開視窗時，重置回初始狀態
         revealTimers.forEach((id) => clearTimeout(id));
         revealTimers = [];
 
