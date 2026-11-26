@@ -262,9 +262,9 @@ if (stackSection && stackGrid && stackCards.length > 0) {
       const offsetX = Math.round(normalizedFromCenter * 75);
       // 上排微微由上往下、下排微微由下往上，形成包覆匯聚感
       const offsetY = row <= 1 ? -18 : 26;
-      // 外圍先動、內側緊隨，並依列數微幅遞增
+      // 外圍先動、內側緊隨，並依列數微幅遞增 (水平 70ms / 垂直 110ms)
       const edgeDistance = Math.abs(col - midIndex);
-      const delay = Math.round((midIndex - edgeDistance) * 45 + row * 70);
+      const delay = Math.round((midIndex - edgeDistance) * 70 + row * 110);
 
       card.style.setProperty('--reveal-x', `${offsetX}px`);
       card.style.setProperty('--reveal-y', `${offsetY}px`);
@@ -302,7 +302,7 @@ if (stackSection && stackGrid && stackCards.length > 0) {
             const timerId = setTimeout(() => {
               card.classList.remove('reveal-init', 'is-visible');
               card.classList.add('reveal-done');
-            }, delayMs + 680);
+            }, delayMs + 1030);
             revealTimers.push(timerId);
           });
         });
