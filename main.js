@@ -238,7 +238,7 @@ if (scrollProgressBar) {
 }
 
 // ==========================================
-// 9. My Stack 區塊：由外向內匯聚滾動進場動畫
+// 9. My Stack 區塊：逐行由外向內匯聚滾動進場動畫 (3.0s)
 // ==========================================
 const stackSection = document.getElementById('stack');
 const stackGrid = document.querySelector('.stack-grid');
@@ -247,28 +247,36 @@ const stackCards = document.querySelectorAll('.stack-card');
 if (stackSection && stackGrid && stackCards.length > 0) {
   let revealTimers = [];
 
-  // 依據目前螢幕寬度計算每列欄位數與每張卡片的「由外向內」起始偏移量
+  // 依據目前螢幕寬度計算每列欄位數與每張卡片的「逐行由外向內」起始偏移量
   function calculateCardOffsets() {
     const gridStyle = window.getComputedStyle(stackGrid);
     const colCount = gridStyle.gridTemplateColumns.split(' ').length || 1;
-    const midIndex = (colCount - 1) / 2;
+    const totalCards = stackCards.length;
 
     stackCards.forEach((card, index) => {
       const col = index % colCount;
       const row = Math.floor(index / colCount);
-      // 距離中心欄位的比例 (-1 最左側 ~ +1 最右側)
-      const normalizedFromCenter = midIndex > 0 ? (col - midIndex) / midIndex : 0;
-      // 距離中心越遠，水平滑入距離越大 (最大 ±75px)
-      const offsetX = Math.round(normalizedFromCenter * 75);
-      // 上排微微由上往下、下排微微由下往上，形成包覆匯聚感
-      const offsetY = row <= 1 ? -18 : 26;
-      // 外圍先動、內側緊隨，並依列數微幅遞增 (水平 70ms / 垂直 110ms)
-      const edgeDistance = Math.abs(col - midIndex);
-      const delay = Math.round((midIndex - edgeDistance) * 70 + row * 110);
+      // 計算該列實際擁有的卡片數量（最後一排若不足 6 張，仍以該排實際張數對稱由外向內）
+      const rowStartIndex = row * colCount;
+      const cardsInThisRow = Math.min(colCount, totalCards - rowStartIndex);
+      const rowMidIndex = (cardsInThisRow - 1) / 2;
+
+      // 距離該列中心點的比例 (-1 最左側 ~ +1 最右側)
+      const normalizedFromCenter = rowMidIndex > 0 ? (col - rowMidIndex) / rowMidIndex : 0;
+      // 距離中心越遠，水平滑入距離越大 (最大 ±90px)
+      const offsetX = Math.round(normalizedFromCenter * 90);
+      // 逐行進場時搭配微微由下往上浮起，層次更清晰
+      const offsetY = 28;
+
+      // 嚴格「一行接一行」節奏：每行間隔 650ms，同一行內由外向內交錯 120ms
+      const edgeDistance = Math.abs(col - rowMidIndex);
+      const withinRowDelay = Math.round((rowMidIndex - edgeDistance) * 120);
+      const rowBaseDelay = row * 650;
+      const delay = rowBaseDelay + Math.max(0, withinRowDelay);
 
       card.style.setProperty('--reveal-x', `${offsetX}px`);
       card.style.setProperty('--reveal-y', `${offsetY}px`);
-      card.style.setProperty('--reveal-delay', `${Math.max(0, delay)}ms`);
+      card.style.setProperty('--reveal-delay', `${delay}ms`);
     });
   }
 
@@ -277,7 +285,6 @@ if (stackSection && stackGrid && stackCards.length > 0) {
   stackCards.forEach((card) => card.classList.add('reveal-init'));
 
   window.addEventListener('resize', () => {
-    // 僅在尚未定格時重新計算偏移
     if (stackCards[0].classList.contains('reveal-init') && !stackCards[0].classList.contains('is-visible')) {
       calculateCardOffsets();
     }
@@ -286,28 +293,27 @@ if (stackSection && stackGrid && stackCards.length > 0) {
   const stackObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        // 清除殘留計時器
         revealTimers.forEach((id) => clearTimeout(id));
         revealTimers = [];
 
         calculateCardOffsets();
 
-        // 下一幀觸發滑入定位
+        // 下一幀逐行觸發滑入定位
         requestAnimationFrame(() => {
           stackCards.forEach((card) => {
             card.classList.add('is-visible');
 
-            // 動畫完成後移除 reveal-init，將過渡效果完全交還給原本的 CSS hover 上浮特效
+            // 3.0s 動畫完整播完後，將過渡效果交還給原本的 CSS hover 上浮特效
             const delayMs = parseInt(card.style.getPropertyValue('--reveal-delay') || '0', 10);
             const timerId = setTimeout(() => {
               card.classList.remove('reveal-init', 'is-visible');
               card.classList.add('reveal-done');
-            }, delayMs + 1030);
+            }, delayMs + 3050);
             revealTimers.push(timerId);
           });
         });
       } else {
-        // 當整個 My Stack 區塊完全離開視窗時，重置回初始外圍狀態，下次滑入或點擊錨點可再次觸發
+        // 當整個 My Stack 區塊完全離開視窗時，重置回初始外圍狀態，下次滑入或點擊錨點可再次逐行觸發
         revealTimers.forEach((id) => clearTimeout(id));
         revealTimers = [];
 

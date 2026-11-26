@@ -393,7 +393,7 @@ main {
   backdrop-filter: blur(5px);
 }
 
-/* My Stack 卡片「由外向內匯聚」滾動進場動畫狀態 (1.5s) */
+/* My Stack 卡片「逐行由外向內匯聚」滾動進場動畫狀態 (總時長加倍為 3.0s) */
 .stack-section .stack-card.reveal-init {
   opacity: 0;
   transform: translate3d(var(--reveal-x, 0px), var(--reveal-y, 24px), 0) scale(0.92);
@@ -403,8 +403,8 @@ main {
   opacity: 1;
   transform: translate3d(0, 0, 0) scale(1);
   transition:
-    opacity 1.5s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
-    transform 1.5s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    opacity 3.0s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 3.0s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
     background-color 0.3s ease,
     border-color 0.3s ease,
     box-shadow 0.3s ease;
@@ -510,7 +510,7 @@ html {
   flex-shrink: 0;
 }
 
-/* 核心調整：調降桌機全螢幕字級，確保單行不爆行（比照附圖二） */
+/* 核心調整：調降桌機全螢幕字級，確保單行不爆行 */
 .work-section .project-item .project-info .project-title {
   font-size: clamp(1.35rem, 2.1vw, 1.85rem);
   font-weight: 700;
@@ -521,7 +521,7 @@ html {
   display: flex;
   align-items: center;
   gap: 12px;
-  white-space: nowrap; /* 桌機全版面時強制單行排版 */
+  white-space: nowrap;
 }
 .work-section .project-item .project-info .project-title .external-icon {
   font-size: 1.35rem;
@@ -606,7 +606,7 @@ html {
     font-size: 1.45rem !important;
     line-height: 1.35;
     gap: 8px;
-    white-space: normal; /* 手機端允許自然折行 */
+    white-space: normal;
   }
   .work-section .project-item .project-info .project-title .external-icon {
     font-size: 1.25rem;
