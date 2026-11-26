@@ -348,3 +348,56 @@ if (stackSection && stackGrid && stackCards.length > 0) {
 
   stackObserver.observe(stackSection);
 }
+
+// ==========================================
+// 10. Works 區塊：模式 A 左右交替由外向內滑入（可重複觸發）
+// ==========================================
+if (projectItems.length > 0) {
+  const workTimers = new WeakMap();
+
+  // 初始化每一列專案的進場起始方向：奇數列從左側 (-90px) 滑入、偶數列從右側 (+90px) 滑入
+  projectItems.forEach((item, index) => {
+    const startX = index % 2 === 0 ? '-90px' : '90px';
+    item.style.setProperty('--work-x', startX);
+    item.classList.add('work-init');
+  });
+
+  const workObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const item = entry.target;
+
+      // 清除該項目殘留計時器
+      if (workTimers.has(item)) {
+        clearTimeout(workTimers.get(item));
+        workTimers.delete(item);
+      }
+
+      if (entry.isIntersecting) {
+        // 確保起始狀態套用後再啟動滑入
+        item.classList.remove('work-done');
+        item.classList.add('work-init');
+        void item.offsetWidth;
+
+        requestAnimationFrame(() => {
+          item.classList.add('work-visible');
+
+          // 1.05s 動畫結束後交還原本的 CSS hover 過渡與預覽彈窗互動
+          const timerId = setTimeout(() => {
+            item.classList.remove('work-init', 'work-visible');
+            item.classList.add('work-done');
+            workTimers.delete(item);
+          }, 1100);
+          workTimers.set(item, timerId);
+        });
+      } else {
+        // 完全離開可視範圍後重置回外側待命，下次滑過或回捲可再次觸發
+        item.classList.remove('work-visible', 'work-done');
+        item.classList.add('work-init');
+      }
+    });
+  }, {
+    threshold: 0.12 // 單一作品項目進入視窗 12% 時觸發
+  });
+
+  projectItems.forEach((item) => workObserver.observe(item));
+}
