@@ -492,11 +492,10 @@ html {
   position: relative;
 }
 
-/* Works 專案項目「左右交替由外向內滑入」進場動畫狀態 */
+/* Works 專案項目「左右交替由外向內滑入」進場動畫狀態（不鎖定 pointer-events，確保移入瞬間即觸發預覽小圖） */
 .work-section .project-item.work-init {
   opacity: 0;
   transform: translate3d(var(--work-x, -80px), 0, 0);
-  pointer-events: none;
 }
 .work-section .project-item.work-init.work-visible {
   opacity: 1;
@@ -509,7 +508,6 @@ html {
 .work-section .project-item.work-done {
   opacity: 1;
   transform: none;
-  pointer-events: auto;
   transition: all 0.3s ease;
 }
 

@@ -134,44 +134,58 @@ if (canvas) {
 }
 
 // ==========================================
-// 5. Work 專案清單 Hover 圖片跟隨（視窗相依 + 邊界防溢出修復版）
+// 5. Work 專案清單 Hover 圖片跟隨（預載秒開 + 零延遲即時跟隨）
 // ==========================================
 const projectItems = document.querySelectorAll('.project-item');
 const previewModal = document.getElementById('project-preview');
 const previewImg = document.getElementById('project-preview-img');
 
 if (previewModal && previewImg) {
+  // 將預覽彈窗移至 body 最外層，避免任何父層 transform 影響 fixed 座標
+  document.body.appendChild(previewModal);
+
+  // 計算並更新預覽彈窗座標（含右側與底部邊界翻轉保護）
+  function updatePreviewPosition(e) {
+    const modalWidth = 360;
+    const modalHeight = 225;
+
+    let left = e.clientX + 24;
+    let top = e.clientY + 20;
+
+    if (left + modalWidth > window.innerWidth) {
+      left = e.clientX - modalWidth - 20;
+    }
+
+    if (top + modalHeight > window.innerHeight) {
+      top = e.clientY - modalHeight - 10;
+    }
+
+    previewModal.style.left = `${left}px`;
+    previewModal.style.top = `${top}px`;
+  }
+
+  // 背景靜默預載所有專案縮圖，確保滑鼠移入瞬間秒開不等待下載
   projectItems.forEach((item) => {
-    // 滑鼠移入：載入對應圖片並顯示
-    item.addEventListener('mouseenter', () => {
-      const imgSrc = item.getAttribute('data-img');
-      if (imgSrc) {
-        previewImg.src = imgSrc;
+    const imgSrc = item.getAttribute('data-img');
+    if (imgSrc) {
+      const preload = new Image();
+      preload.src = imgSrc;
+    }
+
+    // 滑鼠移入：立即設定座標、載入圖片並顯示
+    item.addEventListener('mouseenter', (e) => {
+      const src = item.getAttribute('data-img');
+      if (src) {
+        updatePreviewPosition(e);
+        if (previewImg.getAttribute('src') !== src) {
+          previewImg.src = src;
+        }
         previewModal.classList.add('active');
       }
     });
 
-    // 滑鼠移動：即時座標追蹤，搭配固定定位（Fixed）並防範邊界溢出
-    item.addEventListener('mousemove', (e) => {
-      const modalWidth = 360;
-      const modalHeight = 225;
-      
-      let left = e.clientX + 24;
-      let top = e.clientY + 20;
-
-      // 若右側超出螢幕邊緣，自動翻轉至游標左側
-      if (left + modalWidth > window.innerWidth) {
-        left = e.clientX - modalWidth - 20;
-      }
-
-      // 若底部超出螢幕邊緣，自動向上推移
-      if (top + modalHeight > window.innerHeight) {
-        top = e.clientY - modalHeight - 10;
-      }
-
-      previewModal.style.left = `${left}px`;
-      previewModal.style.top = `${top}px`;
-    });
+    // 滑鼠移動：即時追蹤游標座標
+    item.addEventListener('mousemove', updatePreviewPosition);
 
     // 滑鼠移出：隱藏彈窗
     item.addEventListener('mouseleave', () => {
@@ -269,23 +283,17 @@ if (stackSection && stackGrid && stackCards.length > 0) {
       const col = index % colCount;
       const row = Math.floor(index / colCount);
 
-      // 計算該列實際擁有的卡片數量（最後一排若不足 6 張，仍以該排實際張數對稱由外向內）
       const rowStartIndex = row * colCount;
       const cardsInThisRow = Math.min(colCount, totalCards - rowStartIndex);
       const rowMidIndex = (cardsInThisRow - 1) / 2;
 
-      // 距離該列中心點的比例 (-1 最左側 ~ +1 最右側)
       const normalizedFromCenter = rowMidIndex > 0 ? (col - rowMidIndex) / rowMidIndex : 0;
       const offsetX = Math.round(normalizedFromCenter * 90);
-
-      // 由上往下滑時卡片由下往上浮入 (+28px)；由下往上滑時卡片由上往下落入 (-28px)
       const offsetY = reverseVertical ? -28 : 28;
 
-      // 同一行內由外向內交錯 120ms
       const edgeDistance = Math.abs(col - rowMidIndex);
       const withinRowDelay = Math.round((rowMidIndex - edgeDistance) * 120);
 
-      // 逐行順序：由上往下時第 0 排先動；由下往上時最後一排 (totalRows - 1) 最先動
       const effectiveRow = reverseVertical ? (totalRows - 1 - row) : row;
       const rowBaseDelay = effectiveRow * 650;
       const delay = rowBaseDelay + Math.max(0, withinRowDelay);
@@ -312,17 +320,13 @@ if (stackSection && stackGrid && stackCards.length > 0) {
         revealTimers.forEach((id) => clearTimeout(id));
         revealTimers = [];
 
-        // 依進入視窗當下的滑動方向計算正序（上→下）或反序（下→上）
         calculateCardOffsets(isScrollingUp);
-
-        // 強制瀏覽器先套用新的起始位置 (--reveal-y / --reveal-delay)，下一幀再啟動滑入
         void stackGrid.offsetWidth;
 
         requestAnimationFrame(() => {
           stackCards.forEach((card) => {
             card.classList.add('is-visible');
 
-            // 3.0s 動畫完整播完後，將過渡效果交還給原本的 CSS hover 上浮特效
             const delayMs = parseInt(card.style.getPropertyValue('--reveal-delay') || '0', 10);
             const timerId = setTimeout(() => {
               card.classList.remove('reveal-init', 'is-visible');
@@ -332,7 +336,6 @@ if (stackSection && stackGrid && stackCards.length > 0) {
           });
         });
       } else {
-        // 當整個 My Stack 區塊完全離開視窗時，重置回初始狀態
         revealTimers.forEach((id) => clearTimeout(id));
         revealTimers = [];
 
@@ -343,7 +346,7 @@ if (stackSection && stackGrid && stackCards.length > 0) {
       }
     });
   }, {
-    threshold: 0.15 // 區塊進入畫面 15% 時立即觸發
+    threshold: 0.15
   });
 
   stackObserver.observe(stackSection);
@@ -355,7 +358,6 @@ if (stackSection && stackGrid && stackCards.length > 0) {
 if (projectItems.length > 0) {
   const workTimers = new WeakMap();
 
-  // 初始化每一列專案的進場起始方向：奇數列從左側 (-90px) 滑入、偶數列從右側 (+90px) 滑入
   projectItems.forEach((item, index) => {
     const startX = index % 2 === 0 ? '-90px' : '90px';
     item.style.setProperty('--work-x', startX);
@@ -366,14 +368,12 @@ if (projectItems.length > 0) {
     entries.forEach((entry) => {
       const item = entry.target;
 
-      // 清除該項目殘留計時器
       if (workTimers.has(item)) {
         clearTimeout(workTimers.get(item));
         workTimers.delete(item);
       }
 
       if (entry.isIntersecting) {
-        // 確保起始狀態套用後再啟動滑入
         item.classList.remove('work-done');
         item.classList.add('work-init');
         void item.offsetWidth;
@@ -381,7 +381,6 @@ if (projectItems.length > 0) {
         requestAnimationFrame(() => {
           item.classList.add('work-visible');
 
-          // 1.05s 動畫結束後交還原本的 CSS hover 過渡與預覽彈窗互動
           const timerId = setTimeout(() => {
             item.classList.remove('work-init', 'work-visible');
             item.classList.add('work-done');
@@ -390,13 +389,12 @@ if (projectItems.length > 0) {
           workTimers.set(item, timerId);
         });
       } else {
-        // 完全離開可視範圍後重置回外側待命，下次滑過或回捲可再次觸發
         item.classList.remove('work-visible', 'work-done');
         item.classList.add('work-init');
       }
     });
   }, {
-    threshold: 0.12 // 單一作品項目進入視窗 12% 時觸發
+    threshold: 0.12
   });
 
   projectItems.forEach((item) => workObserver.observe(item));
