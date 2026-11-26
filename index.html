@@ -86,7 +86,7 @@
       transform: translateY(-1px);
     }
 
-    /* About Me 多段落排版微調 */
+    /* About Me 多段落排版微調與打字機游標 */
     .about-section .about-text p {
       color: #8892b0;
       font-size: 1.05rem;
@@ -96,6 +96,33 @@
 
     body.light-theme .about-section .about-text p {
       color: #475569;
+    }
+
+    #about-desc.is-typing {
+      cursor: pointer;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.1em;
+      background-color: #64ffda;
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      animation: typing-blink 0.75s step-end infinite;
+    }
+
+    body.light-theme .typing-cursor {
+      background-color: #2563eb;
+    }
+
+    @keyframes typing-blink {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
     }
 
     /* 專案標籤內的額外連結樣式（霓虹增亮 + 呼吸脈衝發光 + 靠左切齊與多按鈕並排間距） */
@@ -239,8 +266,8 @@
           <h2 class="numbered-heading">
             <span class="heading-number">01.</span> <span id="heading-about">About Me</span>
           </h2>
-          <div id="about-desc">
-            <!-- 由下方 JS 自動注入分段段落 -->
+          <div id="about-desc" title="點擊可立即顯示完整內容">
+            <!-- 由下方 JS 自動執行打字機動畫注入段落 -->
           </div>
         </div>
 
@@ -540,10 +567,11 @@
 
   <script src="main.js"></script>
 
-  <!-- 多語系與主題切換控制邏輯 -->
+  <!-- 多語系、主題切換與 About Me 打字機控制邏輯 -->
   <script>
     let currentLang = localStorage.getItem('site_lang') || 'en';
     let currentTheme = localStorage.getItem('site_theme') || 'dark';
+    let typingRafId = null;
 
     const siteI18n = {
       en: {
@@ -622,6 +650,90 @@
       }
     };
 
+    // About Me 逐段高速打字機動畫引擎（防版面跳動 + 點擊即時顯示全文）
+    function startAboutTypewriter(paragraphs, lang) {
+      const aboutBox = document.getElementById('about-desc');
+      if (!aboutBox) return;
+
+      // 取消尚未完成的打字排程
+      if (typingRafId) {
+        cancelAnimationFrame(typingRafId);
+        typingRafId = null;
+      }
+
+      // 1. 先以完整內容測量實際高度並鎖定 min-height，防止打字時下方區塊跳動
+      aboutBox.style.minHeight = '';
+      aboutBox.innerHTML = paragraphs.map(para => `<p>${para}</p>`).join('');
+      const lockedHeight = aboutBox.offsetHeight;
+      if (lockedHeight > 0) {
+        aboutBox.style.minHeight = `${lockedHeight}px`;
+      }
+
+      // 2. 清空並建立對應段落標籤與閃爍游標
+      aboutBox.innerHTML = '';
+      aboutBox.classList.add('is-typing');
+
+      const pElements = paragraphs.map(() => {
+        const p = document.createElement('p');
+        aboutBox.appendChild(p);
+        return p;
+      });
+
+      const cursor = document.createElement('span');
+      cursor.className = 'typing-cursor';
+      cursor.setAttribute('aria-hidden', 'true');
+
+      let pIndex = 0;
+      let charIndex = 0;
+      // 依語言調整每幀推進字元數（中文約 2 字/幀、英文約 6 字元/幀，整體約 3.5~4.5 秒完成）
+      const charsPerFrame = lang === 'zh' ? 2 : 6;
+
+      function finishTypingImmediately() {
+        if (typingRafId) {
+          cancelAnimationFrame(typingRafId);
+          typingRafId = null;
+        }
+        paragraphs.forEach((text, idx) => {
+          pElements[idx].textContent = text;
+        });
+        if (cursor.parentNode) cursor.remove();
+        aboutBox.classList.remove('is-typing');
+        aboutBox.style.minHeight = '';
+      }
+
+      // 允許訪客點擊文字區直接跳過動畫並顯示完整內容
+      aboutBox.onclick = () => {
+        if (aboutBox.classList.contains('is-typing')) {
+          finishTypingImmediately();
+        }
+      };
+
+      function step() {
+        if (pIndex >= paragraphs.length) {
+          finishTypingImmediately();
+          return;
+        }
+
+        const currentText = paragraphs[pIndex];
+        charIndex = Math.min(currentText.length, charIndex + charsPerFrame);
+
+        const currentP = pElements[pIndex];
+        currentP.textContent = currentText.slice(0, charIndex);
+        currentP.appendChild(cursor);
+
+        if (charIndex >= currentText.length) {
+          // 該段落打完，移除此段游標並推進至下一段
+          if (cursor.parentNode) cursor.remove();
+          pIndex++;
+          charIndex = 0;
+        }
+
+        typingRafId = requestAnimationFrame(step);
+      }
+
+      typingRafId = requestAnimationFrame(step);
+    }
+
     function toggleTheme() {
       currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
       localStorage.setItem('site_theme', currentTheme);
@@ -659,12 +771,9 @@
       document.getElementById('nav-contact').innerText = t.navContact;
       document.getElementById('nav-resume').innerText = t.navResume;
 
-      // 區塊標題與介紹內文 (陣列多段落渲染)
+      // 區塊標題與 About Me 打字機動畫渲染
       document.getElementById('heading-about').innerText = t.headingAbout;
-      const aboutBox = document.getElementById('about-desc');
-      if (aboutBox) {
-        aboutBox.innerHTML = t.aboutDesc.map(para => `<p>${para}</p>`).join('');
-      }
+      startAboutTypewriter(t.aboutDesc, currentLang);
 
       document.getElementById('heading-stack').innerText = t.headingStack;
       document.getElementById('heading-work').innerText = t.headingWork;
