@@ -392,6 +392,29 @@ main {
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   backdrop-filter: blur(5px);
 }
+
+/* ★ 新增：My Stack 卡片「由外向內匯聚」滾動進場動畫狀態 */
+.stack-section .stack-card.reveal-init {
+  opacity: 0;
+  transform: translate3d(var(--reveal-x, 0px), var(--reveal-y, 24px), 0) scale(0.92);
+  pointer-events: none;
+}
+.stack-section .stack-card.reveal-init.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.stack-section .stack-card.reveal-done {
+  opacity: 1;
+  pointer-events: auto;
+  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
 .stack-section .stack-card .icon-box {
   width: 48px;
   height: 48px;
